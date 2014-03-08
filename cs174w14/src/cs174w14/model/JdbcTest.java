@@ -13,7 +13,7 @@ public class JdbcTest {
 			conn = DriverManager.getConnection(serverAddress, "e_west", "4871406");
 
 			Statement st = conn.createStatement();
-			rs = st.executeQuery("SELECT owner, table_name FROM all_tables");
+			rs = st.executeQuery("SELECT owner, table_name FROM all_tables WHERE owner='E_WEST'");
 			
 			while(rs.next()){
 				System.out.println(rs.getString("owner")+","+rs.getString("table_name"));
