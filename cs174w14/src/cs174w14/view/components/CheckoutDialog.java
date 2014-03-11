@@ -64,6 +64,10 @@ public class CheckoutDialog extends JDialog {
 	    this.setLocationRelativeTo(null); // center the window
 	}
 	
+	public int getTotalCents() {
+		return totalCents;
+	}
+	
 	public void addCancelButtonListener(ActionListener buttonListener) {
 		cancelButton.addActionListener(buttonListener);
 	}
