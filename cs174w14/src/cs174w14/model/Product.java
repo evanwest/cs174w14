@@ -23,6 +23,7 @@ public class Product implements ModelDataObject {
 
 	private Map<String, String> descriptions=null;
 	private List<Product> accessories=null;
+	private List<Product> accessory_of=null;
 
 	public Product(String stock_num){
 		this.stock_num=stock_num;
@@ -171,11 +172,30 @@ public class Product implements ModelDataObject {
 			try{
 				loadAccessories();
 			} catch (SQLException sqle){
-
+				sqle.printStackTrace();
 			}
 		}
 		return this.accessories;
-
+	}
+	
+	public List<Product> getAccessoryOf(){
+		if(this.accessory_of==null){
+			try{
+				loadAccessoryOf();
+			} catch(SQLException sqle){
+				sqle.printStackTrace();
+			}
+		}
+		return this.accessory_of;
+	}
+	
+	public String getAccessoryOfParagraph(){
+		List<Product> acc_of = getAccessoryOf();
+		StringBuilder sb = new StringBuilder();
+		for(Product p: acc_of){
+			sb.append(p.getStockNum()+", ");
+		}
+		return sb.toString();
 	}
 
 	@Override
@@ -224,9 +244,18 @@ public class Product implements ModelDataObject {
 	private void loadAccessories() throws SQLException{
 		this.accessories = new ArrayList<Product>();
 		ResultSet acc = ConnectionManager.runQuery(
-				"SELECT acc_stock_num FROM accessories WHERE acc_of_stock_num='"+this.stock_num+"'");
+				"SELECT acc_stock_num FROM accessories WHERE acc_of_stock_num='"+this.stock_num+"';");
 		while(acc.next()){
 			this.accessories.add(new Product(acc.getString("acc_stock_num")));
+		}
+	}
+	
+	private void loadAccessoryOf() throws SQLException{
+		this.accessory_of = new ArrayList<Product>();
+		ResultSet accof = ConnectionManager.runQuery(
+				"SELECT acc_of_stock_num FROM accessories WHERE acc_stock_num='"+this.stock_num+"';");
+		while(accof.next()){
+			this.accessory_of.add(new Product(accof.getString("acc_of_stock_num")));
 		}
 	}
 

@@ -28,7 +28,8 @@ public class LoginController {
 	public void login(String username, String password) {
 		//TODO: perform login, determine if is customer manager.
 		// if customer, do:
+		String cust_id="TODO";
 		loginView.dispose();
-		customerRunner.run();
+		customerRunner.run(cust_id);
 	}
 }
