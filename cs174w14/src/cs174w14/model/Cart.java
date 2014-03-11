@@ -74,6 +74,12 @@ public class Cart implements ModelDataObject {
 		}
 	}
 
+	@Override
+	public boolean insert() {
+		// this is nonsensical in this context
+		return false;
+	}
+
 
 
 

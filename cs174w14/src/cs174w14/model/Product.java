@@ -104,11 +104,6 @@ public class Product implements ModelDataObject {
 		return this.old_price;
 	}
 
-	public int getPrice() {
-		return price_cents;
-	}
-
-
 	public int getQuantityInStock() {
 		return quantity_in_stock;
 	}
@@ -150,7 +145,7 @@ public class Product implements ModelDataObject {
 		}
 		return this.descriptions.get(key);
 	}
-	
+
 	public String getDescriptionParagraph(){
 		if(descriptions==null){
 			try{
@@ -242,11 +237,7 @@ public class Product implements ModelDataObject {
 	 */
 	@Override
 	public boolean push() {
-		// TODO do SQL here
-		//first check if exists in table
-		boolean exists=true;
-		if(exists){
-			try{
+		try{
 			ConnectionManager.runQuery("UPDATE Products SET"
 					+ "warranty="+this.warranty+", "
 					+ "price="+this.price_cents+","
@@ -257,12 +248,43 @@ public class Product implements ModelDataObject {
 					+ "max_num="+this.maximum_stock+","
 					+ "replenishment="+this.replenishment_amt
 					+ " WHERE stock_num='"+this.stock_num+"';");
+			//TODO: update accessories and descriptions
 			return true;
-			} catch(SQLException sqle){
-				return false;
-			}
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+			return false;
 		}
-		//else insert (not now)
-		return false;
+	}
+
+	@Override
+	public boolean insert() {
+		try{
+			ConnectionManager.runQuery("INSERT INTO Products ("
+					+"stock_num, model_num, mfr, category, location,"
+					+ "warranty, price, qty, min_num, max_num, replenishent)"
+					+ "VALUES ('"+this.stock_num+"', '"+this.model_num+"', "
+					+ "'"+this.manufacturer+"', '"+this.category+"', "
+					+ "'"+this.location+"', "+this.warranty+", "
+					+ this.price_cents+", "+this.quantity_in_stock+", "
+					+ this.minimum_stock+", "+this.maximum_stock+", "
+					+ this.replenishment_amt+");");
+					
+			//now need to insert descriptions
+			for(Map.Entry<String, String> entry : this.descriptions.entrySet()){
+				ConnectionManager.runQuery("INSERT INTO Descriptions "
+						+ "(stock_num, attr, val) VALUES ("
+						+ "'"+this.stock_num+"', '"+entry.getKey()+"', '"+entry.getValue()+"' );");
+			}
+			//now insert accessories
+			for(Product entry : this.accessories){
+				ConnectionManager.runQuery("INSERT INTO Accessories "
+						+ "(acc_of_stock_num, acc_stock_num) VALUES "
+						+ "'"+this.stock_num+"', '"+entry.getStockNum()+"');");
+			}
+			return true;
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+			return false;
+		}
 	}
 }

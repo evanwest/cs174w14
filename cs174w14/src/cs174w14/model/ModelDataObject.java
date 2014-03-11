@@ -5,5 +5,7 @@ import java.sql.SQLException;
 public interface ModelDataObject {
 	public void fill() throws SQLException;
 	
-	public boolean push();	
+	public boolean push();
+	
+	public boolean insert();
 }

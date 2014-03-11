@@ -4,9 +4,11 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class CustomerOrder {
+public class CustomerOrder implements ModelDataObject {
 	int order_num;
 	char loyalty_id;
 	int shipping_handling;
@@ -15,7 +17,7 @@ public class CustomerOrder {
 	String cust_id;
 	Date order_date;
 	
-	List<Product> contents;
+	Map<Product, Integer> contents;
 	LoyaltyClass loyaltyClass;
 	
 	public CustomerOrder(int order_num){
@@ -67,7 +69,7 @@ public class CustomerOrder {
 		return order_date;
 	}
 
-	public List<Product> getContents() {
+	public Map<Product, Integer> getContents() {
 		if(this.contents==null){
 			try{
 				loadContents();
@@ -78,7 +80,8 @@ public class CustomerOrder {
 		return contents;
 	}
 	
-	public void fillStub() throws SQLException{
+	@Override
+	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(
 				"SELECT * FROM Orders WHERE order_num='"+this.order_num+"'");
 		me.first();
@@ -96,13 +99,41 @@ public class CustomerOrder {
 	}
 	
 	private void loadContents() throws SQLException{
-		this.contents = new ArrayList<Product>();
+		this.contents = new HashMap<Product, Integer>();
 		ResultSet cont = ConnectionManager.runQuery(
 				"SELECT * FROM Order_Items WHERE order_num='"+this.order_num+"'");
 		while(cont.next()){
 			Product p = new Product(cont.getString("stock_num"));
 			p.setOldPrice(cont.getInt("price"));
-			this.contents.add(p);
+			this.contents.put(p, cont.getInt("qty"));
+		}
+	}
+
+	@Override
+	public boolean push() {
+		// this operation need not be supported
+		return false;
+	}
+
+	@Override
+	public boolean insert() {
+		try{
+			ConnectionManager.runQuery("INSERT INTO Orders"
+					+ "(order_num, loyalty, ship_hand, subtotal, total,"
+					+ "cust_id) VALUES ("
+					+ this.order_num+", '"+this.loyalty_id+"', "+this.shipping_handling
+					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+");");
+			for(Map.Entry<Product, Integer> entry : contents.entrySet() ){
+				// TODO: maybe call fill for all entries?
+				ConnectionManager.runQuery("INSERT INTO Order_Items "
+						+ "(order_num, stock_num, qty, price) VALUES ("
+						+ this.order_num+", '"+entry.getKey().getStockNum()+"', "
+						+ entry.getValue()+", "+entry.getKey().getPriceCents()+")");
+			}
+			return true;
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+			return false;
 		}
 	}
 	

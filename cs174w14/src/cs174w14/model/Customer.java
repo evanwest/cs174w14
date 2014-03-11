@@ -19,6 +19,7 @@ public class Customer implements ModelDataObject {
 	private char loyalty;
 	private char loyalty_temp;
 	private int loyalty_expiration;
+	private boolean manager;
 
 	public Customer(String cust_id){
 		this.cust_id=cust_id;
@@ -27,7 +28,8 @@ public class Customer implements ModelDataObject {
 	public Customer(String cust_id, String pwd_hash, String salt, 
 			String f_name, String m_name, String l_name, String email, 
 			String address_addr, String city_addr, String state_addr,
-			String zip_addr, char loyalty, char loyalty_temp, int loyalty_expiration){
+			String zip_addr, char loyalty, char loyalty_temp, 
+			int loyalty_expiration, boolean manager){
 		this.cust_id=cust_id;
 		this.pwd_hash=pwd_hash;
 		this.salt=salt;
@@ -42,17 +44,18 @@ public class Customer implements ModelDataObject {
 		this.loyalty=loyalty;
 		this.loyalty_temp=loyalty_temp;
 		this.loyalty_expiration=loyalty_expiration;
+		this.manager=manager;
 	}
 
 	public Customer(ResultSet rs) throws SQLException{
 		fillFromResultSet(rs);
 	}
 
-	public String getCust_id() {
+	public String getCustId() {
 		return cust_id;
 	}
 
-	public String getPwd_hash() {
+	public String getPwdHash() {
 		return pwd_hash;
 	}
 
@@ -60,15 +63,15 @@ public class Customer implements ModelDataObject {
 		return salt;
 	}
 
-	public String getFirst_name() {
+	public String getFirstName() {
 		return first_name;
 	}
 
-	public String getMiddle_name() {
+	public String getMiddleName() {
 		return middle_name;
 	}
 
-	public String getLast_name() {
+	public String getLastName() {
 		return last_name;
 	}
 
@@ -76,19 +79,19 @@ public class Customer implements ModelDataObject {
 		return email;
 	}
 
-	public String getAddress_addr() {
+	public String getAddressAddr() {
 		return address_addr;
 	}
 
-	public String getCity_addr() {
+	public String getCityAddr() {
 		return city_addr;
 	}
 
-	public String getState_addr() {
+	public String getStateAddr() {
 		return state_addr;
 	}
 
-	public String getZip_addr() {
+	public String getZipAddr() {
 		return zip_addr;
 	}
 
@@ -96,12 +99,16 @@ public class Customer implements ModelDataObject {
 		return loyalty;
 	}
 
-	public char getLoyalty_temp() {
+	public char getLoyaltyTemp() {
 		return loyalty_temp;
 	}
 
-	public int getLoyalty_expiration() {
+	public int getLoyaltyExpiration() {
 		return loyalty_expiration;
+	}
+
+	public boolean getManager(){
+		return this.manager;
 	}
 
 	public void fill() throws SQLException{
@@ -126,7 +133,7 @@ public class Customer implements ModelDataObject {
 		this.loyalty=rs.getString("loyalty").charAt(0);
 		this.loyalty_temp=rs.getString("loyalty_temp").charAt(0);
 		this.loyalty_expiration=rs.getInt("loyalty_expiration");
-
+		this.manager=(rs.getString("manager").equals("T"));
 	}
 
 	@Override
@@ -145,12 +152,38 @@ public class Customer implements ModelDataObject {
 					+"addr_zip='"+this.zip_addr+"', "
 					+"loyalty='"+this.loyalty+"', "
 					+"loyalty_temp='"+this.loyalty_temp+"', "
-					+"loyalty_expiration="+this.loyalty_expiration
+					+"loyalty_expiration="+this.loyalty_expiration+", "
+					+"manager='"+(this.manager? "T" : "F")+"'"
 					+"WHERE cust_id='"+this.cust_id+"';");
 			return true;
 		} catch (SQLException sqle){
+			sqle.printStackTrace();
 			return false;
 		}
 
+	}
+
+	@Override
+	public boolean insert() {
+		try{
+			ConnectionManager.runQuery("INSERT INTO Customers "
+					+ "(cust_id, pwd_hash, salt, f_name, m_name, l_name,"
+					+ "email, addr_addr, addr_city, addr_state,"
+					+ "addr_zip, loyalty, loyalty_temp, "
+					+ "loyalty_expiration, manager) VALUES ("
+					+ "'"+this.cust_id+"', '"+this.pwd_hash+"', "
+					+"'"+this.salt+"', '"+this.first_name+"', "
+					+"'"+this.middle_name+"', '"+this.last_name+"', "
+					+"'"+this.email+"', '"+this.address_addr+"', "
+					+"'"+this.city_addr+"', '"+this.state_addr+"', "
+					+"'"+this.zip_addr+"', '"+this.loyalty+"', "
+					+"'"+this.loyalty_temp+"', "+this.loyalty_expiration+", "
+					+"'"+(this.manager ? "T" : "F")+"');");
+
+					return true;
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+			return false;
+		}
 	}
 }

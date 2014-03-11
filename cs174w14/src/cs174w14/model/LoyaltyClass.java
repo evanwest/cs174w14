@@ -13,14 +13,14 @@ public class LoyaltyClass implements ModelDataObject {
 	public LoyaltyClass(char _id){
 		this.id=_id;
 	}
-	
+
 	public LoyaltyClass(char _id, int ship_hand_pct, int discount_pct, String name){
 		this.id=_id;
 		this.shipping_handling_pct=ship_hand_pct;
 		this.discount_pct=discount_pct;
 		this.name=name;
 	}
-	
+
 	public LoyaltyClass(ResultSet rs) throws SQLException{
 		fillFromResultSet(rs);
 	}
@@ -47,7 +47,7 @@ public class LoyaltyClass implements ModelDataObject {
 		me.first();
 		fillFromResultSet(me);
 	}
-	
+
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.shipping_handling_pct=rs.getInt("ship_hand");
 		this.discount_pct=rs.getInt("discount");
@@ -56,7 +56,33 @@ public class LoyaltyClass implements ModelDataObject {
 
 	@Override
 	public boolean push() {
-		// TODO do SQL here
-		return false;
+		try{
+			ConnectionManager.runQuery("UPDATE Loyalty SET"
+					+ "name='"+this.name+"', "
+					+ "pct_discount="+this.discount_pct+", "
+					+ "ship_hand="+this.shipping_handling_pct
+					+ "WHERE id='"+this.id+"';");
+			return true;
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public boolean insert() {
+		try{
+			if(this.name==null || this.discount_pct<0 || this.shipping_handling_pct<0){
+				return false;
+			}
+			ConnectionManager.runQuery("INSERT INTO Loyalty "
+					+ "(id, name, pct_discount, ship_hand)"
+					+ "VALUES ('"+this.id+"', '"+this.name+", "
+					+ this.discount_pct+", "+this.shipping_handling_pct+");");
+			return true;
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+			return false;
+		}
 	}
 }
