@@ -18,14 +18,6 @@ public class SearchView extends JFrame {
 	
 	private JPanel panel;
 	
-	private JLabel stockNumberLabel;
-	private JLabel accessoryOfLabel;
-	private JLabel manufacturerLabel;
-	private JLabel modelNumberLabel;
-	private JLabel categoryLabel;
-	private JLabel descriptionAttrLabel;
-	private JLabel descriptionValueLabel;
-	
 	private JTextField stockNumberField;
 	private JTextField accessoryOfField;
 	private JTextField manufacturerField;
@@ -41,19 +33,19 @@ public class SearchView extends JFrame {
 		
 		panel = new JPanel();
 		
-		stockNumberLabel = new JLabel("Stock number: ");
+		JLabel stockNumberLabel = new JLabel("Stock number: ");
 		stockNumberLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
-		accessoryOfLabel = new JLabel("Accessory of (stock number):");
+		JLabel accessoryOfLabel = new JLabel("Accessory of (stock number):");
 		accessoryOfLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
-		manufacturerLabel = new JLabel("Manufacturer: ");
+		JLabel manufacturerLabel = new JLabel("Manufacturer: ");
 		manufacturerLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
-		modelNumberLabel = new JLabel("Model number: ");
+		JLabel modelNumberLabel = new JLabel("Model number: ");
 		modelNumberLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
-		categoryLabel = new JLabel("Category: ");
+		JLabel categoryLabel = new JLabel("Category: ");
 		categoryLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
-		descriptionAttrLabel = new JLabel("Description attribute: ");
+		JLabel descriptionAttrLabel = new JLabel("Description attribute: ");
 		descriptionAttrLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
-		descriptionValueLabel = new JLabel("Description value: ");
+		JLabel descriptionValueLabel = new JLabel("Description value: ");
 		descriptionValueLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
 		
 		stockNumberField = new JTextField(20);

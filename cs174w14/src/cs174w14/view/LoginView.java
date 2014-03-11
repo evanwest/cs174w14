@@ -15,8 +15,6 @@ public class LoginView extends JFrame {
 	private static final int FRAME_HEIGHT = 185;
 	
 	private JPanel panel;
-	private JLabel usernameLabel;
-	private JLabel passwordLabel;
 	
 	private JTextField usernameField;
 	private JTextField passwordField;
@@ -28,8 +26,8 @@ public class LoginView extends JFrame {
 		
 		panel = new JPanel();
 		
-		usernameLabel = new JLabel("username: ");
-		passwordLabel = new JLabel("password: ");
+		JLabel usernameLabel = new JLabel("username: ");
+		JLabel passwordLabel = new JLabel("password: ");
 		usernameField = new JTextField(20);
 		passwordField = new JPasswordField(20);
 		loginButton = new JButton("Login");
