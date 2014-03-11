@@ -57,11 +57,11 @@ public class CustomerHomeView extends JFrame {
 		searchButton.addActionListener(buttonListener);
 	}
 	
-	public void addViewCartButtonButtonListener(ActionListener buttonListener) {
+	public void addViewCartButtonListener(ActionListener buttonListener) {
 		viewCartButton.addActionListener(buttonListener);
 	}
 	
-	public void addPreviousOrdersButtonButtonListener(ActionListener buttonListener) {
+	public void addPreviousOrdersButtonListener(ActionListener buttonListener) {
 		previousOrdersButton.addActionListener(buttonListener);
 	}
 }

@@ -28,7 +28,7 @@ public class SearchView extends JFrame {
 	private JButton searchButton;
 	
 	public SearchView() {
-		this.setTitle("Login to eMart!");
+		this.setTitle("Product Search");
 		this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		
 		panel = new JPanel();
@@ -77,21 +77,38 @@ public class SearchView extends JFrame {
 		this.getContentPane().add(panel);
 		
 		this.setResizable(false);
-	    this.setLocationRelativeTo(null); // center the window
         this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 	}
 	
-	public String getUsername() {
-		//return usernameField.getText();
-		return null;
+	public String getStockNumber() {
+		return stockNumberField.getText();
 	}
 	
-	public String getPassword() {
-		//return passwordField.getText();
-		return null;
+	public String getAccessoryOf() {
+		return accessoryOfField.getText();
 	}
 	
-	public void addLoginButtonListener(ActionListener buttonListener) {
-		//loginButton.addActionListener(buttonListener);
+	public String getManufacturer() {
+		return manufacturerField.getText();
+	}
+	
+	public String getModelNumber() {
+		return modelNumberField.getText();
+	}
+	
+	public String getCategory() {
+		return categoryField.getText();
+	}
+	
+	public String getDescriptionAttr() {
+		return descriptionAttrField.getText();
+	}
+	
+	public String getDescriptionValue() {
+		return descriptionValueField.getText();
+	}
+	
+	public void addSearchButtonListener(ActionListener buttonListener) {
+		searchButton.addActionListener(buttonListener);
 	}
 }

@@ -1,17 +1,20 @@
 package cs174w14.view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import cs174w14.view.components.PreviousOrderProductPanel;
+import cs174w14.view.components.ProductScrollPane;
 
 public class PreviousOrdersView extends JFrame {
 	private static final int FRAME_WIDTH = 600;
@@ -23,6 +26,7 @@ public class PreviousOrdersView extends JFrame {
 	private ProductScrollPane productScrollPane;
 	
 	public PreviousOrdersView() {
+		this.setTitle("Previous Orders");
 		this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		this.setLayout(new BorderLayout());
 		
@@ -31,11 +35,12 @@ public class PreviousOrdersView extends JFrame {
 		
 		JLabel orderNumberLabel = new JLabel("Previous order number: ");
 		orderNumberField = new JTextField("", 10);
+		orderNumberField.setMinimumSize(orderNumberField.getPreferredSize());
 		findOrderButton = new JButton("Find previous order");
 		rerunOrderButton = new JButton("Rerun this order");
 		rerunOrderButton.setVisible(false);
 		
-		productScrollPane = new ProductScrollPane();
+		productScrollPane = new ProductScrollPane("Previous order not found.");
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(10,0,10,0);
@@ -54,7 +59,7 @@ public class PreviousOrdersView extends JFrame {
 		c.gridx = 0;
 		c.gridy = 1;
 		c.gridwidth = 3;
-		c.weightx = 0.0;
+		c.weightx = 1.0;
 		c.weighty = 1.0;   //request any extra vertical space
 		c.fill = GridBagConstraints.BOTH;
 		previousOrdersPanel.add(productScrollPane, c);
@@ -71,15 +76,37 @@ public class PreviousOrdersView extends JFrame {
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE); //TODO
 	}
 	
-	public void setOrder(ProductPanel[] order) {
-		if (order.length > 0) {
+	public void setOrder(ArrayList<PreviousOrderProductPanel> order) {
+		if (order!= null && order.size() > 0) {
 			rerunOrderButton.setVisible(true);
-			this.revalidate();
+			this.repaint();
 		}
 		else {
 			rerunOrderButton.setVisible(false);
-			this.revalidate();
+			this.repaint();
 		}
 		productScrollPane.setChildren(order);
+	}
+	
+	public void clearContents() {
+		rerunOrderButton.setVisible(false);
+		productScrollPane.setChildren(null);
+	}
+	
+	public void setEmptyMessage(String message) {
+		productScrollPane.setEmptyMessage(message);
+		productScrollPane.repaint();
+	}
+	
+	public String getOrderNumber() {
+		return orderNumberField.getText();
+	}
+	
+	public void addFindOrderButtonListener(ActionListener buttonListener) {
+		findOrderButton.addActionListener(buttonListener);
+	}
+	
+	public void addRerunOrderButtonListener(ActionListener buttonListener) {
+		rerunOrderButton.addActionListener(buttonListener);
 	}
 }

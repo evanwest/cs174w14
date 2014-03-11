@@ -5,15 +5,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
-import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+
+import cs174w14.view.components.ProductScrollPane;
+import cs174w14.view.components.SearchResultProductPanel;
 
 public class SearchResultsView extends JFrame {
 	private static final int FRAME_WIDTH = 625;
@@ -23,6 +22,7 @@ public class SearchResultsView extends JFrame {
 	private JButton backButton;
 	
 	public SearchResultsView() {
+		this.setTitle("Search Results");
 		this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		this.setLayout(new BorderLayout());
 		
@@ -50,7 +50,7 @@ public class SearchResultsView extends JFrame {
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 	}
 	
-	public void setResults(ProductPanel[] results) {
+	public void setResults(ArrayList<SearchResultProductPanel> results) {
 		productScrollPane.setChildren(results);
 	}
 	
