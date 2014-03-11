@@ -19,6 +19,7 @@ public class JdbcTest {
 				System.out.println(rs.getString("owner")+","+rs.getString("table_name"));
 			}
 			
+			
 			rs.close();
 			conn.close();
 		} catch (SQLException sqle){
