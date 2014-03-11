@@ -3,5 +3,9 @@ package cs174w14.model;
 import java.sql.SQLException;
 
 public interface ModelDataObject {
-	public void fillStub() throws SQLException;
+	public void fill() throws SQLException;
+	
+	public boolean push();
+	
+	public boolean insert();
 }
