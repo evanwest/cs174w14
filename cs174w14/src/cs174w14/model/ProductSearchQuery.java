@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StoreProductSearch {
+public class ProductSearchQuery  {
 	final String query;
-	List<StoreProduct> result;
+	List<Product> result;
 
-	StoreProductSearch(String query){
+	ProductSearchQuery(String query){
 		this.query=query;
 	}
 
@@ -19,12 +19,12 @@ public class StoreProductSearch {
 	 * fresh from the database.
 	 * @return
 	 */
-	public List<StoreProduct> execute() throws SQLException{
-		this.result = new ArrayList<StoreProduct>();
+	public List<Product> execute() throws SQLException{
+		this.result = new ArrayList<Product>();
 		ResultSet rs = ConnectionManager.runQuery(query);
 		while(rs.next()){
-			StoreProduct sp = new StoreProduct(rs);
-			this.result.add(sp);
+			Product item = new Product(rs);
+			this.result.add(item);
 		}
 		return result;
 	}
@@ -34,7 +34,7 @@ public class StoreProductSearch {
 	 * been executed, otherwise it will execute it and then return;
 	 * @return
 	 */
-	public List<StoreProduct> getResults() throws SQLException{
+	public List<Product> getResults() throws SQLException{
 		if(this.result==null){
 			return this.execute();
 		}

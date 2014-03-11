@@ -3,7 +3,7 @@ package cs174w14.model;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class LoyaltyClass {
+public class LoyaltyClass implements ModelDataObject {
 
 	private char id;
 	private int shipping_handling_pct;
@@ -41,7 +41,7 @@ public class LoyaltyClass {
 		return name;
 	}
 
-	private void fillStub() throws SQLException{
+	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(
 				"SELECT * FROM Loyalty WHERE id='"+this.id+"'");
 		me.first();
@@ -52,5 +52,11 @@ public class LoyaltyClass {
 		this.shipping_handling_pct=rs.getInt("ship_hand");
 		this.discount_pct=rs.getInt("discount");
 		this.name=rs.getString("name");
+	}
+
+	@Override
+	public boolean push() {
+		// TODO do SQL here
+		return false;
 	}
 }

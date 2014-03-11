@@ -15,7 +15,7 @@ public class CustomerOrder {
 	String cust_id;
 	Date order_date;
 	
-	List<StoreProduct> contents;
+	List<Product> contents;
 	LoyaltyClass loyaltyClass;
 	
 	public CustomerOrder(int order_num){
@@ -67,7 +67,7 @@ public class CustomerOrder {
 		return order_date;
 	}
 
-	public List<StoreProduct> getContents() {
+	public List<Product> getContents() {
 		if(this.contents==null){
 			try{
 				loadContents();
@@ -96,11 +96,11 @@ public class CustomerOrder {
 	}
 	
 	private void loadContents() throws SQLException{
-		this.contents = new ArrayList<StoreProduct>();
+		this.contents = new ArrayList<Product>();
 		ResultSet cont = ConnectionManager.runQuery(
 				"SELECT * FROM Order_Items WHERE order_num='"+this.order_num+"'");
 		while(cont.next()){
-			StoreProduct p = new StoreProduct(cont.getString("stock_num"));
+			Product p = new Product(cont.getString("stock_num"));
 			p.setOldPrice(cont.getInt("price"));
 			this.contents.add(p);
 		}
