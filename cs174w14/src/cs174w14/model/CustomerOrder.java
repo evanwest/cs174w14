@@ -44,7 +44,7 @@ public class CustomerOrder implements ModelDataObject {
 	 * @param c
 	 */
 	public CustomerOrder(Cart c) throws SQLException{
-		this.order_num = (int)(Math.random()*1000000); //TODO: actually keep track so we can reject duplicates
+		this.order_num = getNewOrderNum();
 		this.cust_id = c.getCustomerId();
 		this.contents = c.getContents();
 		Customer cust = new Customer(c.getCustomerId());
@@ -59,6 +59,11 @@ public class CustomerOrder implements ModelDataObject {
 	}
 
 
+
+	private int getNewOrderNum() {
+		//TODO: actually check order numbers here so no dupliates
+		return (int)(Math.random()*1000000000);
+	}
 
 	public int getOrderNum() {
 		return order_num;
@@ -143,6 +148,14 @@ public class CustomerOrder implements ModelDataObject {
 		shipping_handling = (subtotal*loyaltyClass.getShipping_handling_pct())/100;
 		int discount = (subtotal*loyaltyClass.getDiscount_pct())/100;
 		total=subtotal+shipping_handling-discount;
+	}
+	
+	public void recalculate() throws SQLException{
+		this.order_num=getNewOrderNum();
+		for(Product p: this.contents.keySet()){
+			p.fill();
+		}
+		calculateTotals();
 	}
 
 	@Override

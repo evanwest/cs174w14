@@ -77,7 +77,7 @@ public class CartController {
 
 	public void checkout() {
 		//TODO: use real subtotal, discount, and ship&hand values to make this dialog
-		int subtotal=0, total=0, discount=0, ship_hand=0;
+		int subtotal=0, discount=0, ship_hand=0;
 		for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet()){
 			Product p = entry.getKey();
 			int qty = entry.getValue();
@@ -87,7 +87,7 @@ public class CartController {
 				sqle.printStackTrace();
 				continue;
 			}
-			subtotal+=p.getPriceCents();
+			subtotal+=p.getPriceCents()*qty;
 		}
 		try{
 			Customer c = new Customer(cart.getCustomerId());
@@ -106,34 +106,37 @@ public class CartController {
 			public void actionPerformed(ActionEvent e) {
 				//TODO: add here the logic for checking out from the model
 				//turn this cart into an order, (TODO: pass to store_orders later)
+				CustomerOrder co;
 				try{
-					CustomerOrder co = new CustomerOrder(cart);
+					co = new CustomerOrder(cart);
 					boolean result = co.insert();
 					if(!result){
 						System.err.println("Error placing order!");
+						//TODO: something useful here. This is a fatal error for this op 
+						return;
 					}
+					//now reset cart contents
+					for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet() ){
+						entry.setValue(0);
+					}
+					result = cart.push();
+					if(!result){
+						System.err.println("Error resetting cart contents!");
+						//TODO: something useful here, this isn't a fatal error
+					}
+
+					//passed in through the constructor. remember to update customer status
+
+
+					cartView.clearContents();
+					cartView.setEmptyMessage("Successfully checked out order number: "+co.getOrderNum());
+					checkoutDialog.dispose();
 				} catch(SQLException sqle){
 					System.err.println("Error placing order!");
 					sqle.printStackTrace();
-				}
-				
-				//now reset cart contents
-				for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet() ){
-					entry.setValue(0);
-				}
-				boolean result = cart.push();
-				if(!result){
-					System.err.println("Error updating cart contents!");
-					//TODO: something useful here
+					//TODO: how handle errors
 				}
 
-				//passed in through the constructor. remember to update customer status
-
-				
-				cartView.clearContents();
-				cartView.setEmptyMessage("Successfully checked out order number: 4434434");
-				//TODO: fix the above line to print the real order number.
-				checkoutDialog.dispose();
 			}
 		});
 		checkoutDialog.addCancelButtonListener(new ActionListener() {
@@ -145,6 +148,12 @@ public class CartController {
 	}
 
 	public void updateCartProductQuantity(String stockNumber, int quantity) {
-		//TODO: update the quantity of a particular stock number in the cart.
+		for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet()){
+			if(entry.getKey().getStockNum().equals(stockNumber)){
+				//set stock num
+				entry.setValue(quantity);
+			}
+		}
+		cart.push();
 	}
 }

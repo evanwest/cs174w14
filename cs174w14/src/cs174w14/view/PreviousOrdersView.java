@@ -5,7 +5,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -76,7 +76,7 @@ public class PreviousOrdersView extends JFrame {
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE); //TODO
 	}
 	
-	public void setOrder(ArrayList<PreviousOrderProductPanel> order) {
+	public void setOrder(List<PreviousOrderProductPanel> order) {
 		if (order!= null && order.size() > 0) {
 			rerunOrderButton.setVisible(true);
 			this.repaint();

@@ -198,6 +198,50 @@ public class Product implements ModelDataObject {
 		return sb.toString();
 	}
 
+	public void setStockNum(String stock_num) {
+		this.stock_num = stock_num;
+	}
+
+	public void setModelNum(String model_num) {
+		this.model_num = model_num;
+	}
+
+	public void setWarranty(int warranty) {
+		this.warranty = warranty;
+	}
+
+	public void setPriceCents(int price_cents) {
+		this.price_cents = price_cents;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public void setManufacturer(String manufacturer) {
+		this.manufacturer = manufacturer;
+	}
+
+	public void setQuantityInStock(int quantity_in_stock) {
+		this.quantity_in_stock = quantity_in_stock;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public void setMinimumStock(int minimum_stock) {
+		this.minimum_stock = minimum_stock;
+	}
+
+	public void setMaximumStock(int maximum_stock) {
+		this.maximum_stock = maximum_stock;
+	}
+
+	public void setReplenishmentAmt(int replenishment_amt) {
+		this.replenishment_amt = replenishment_amt;
+	}
+
 	@Override
 	public void fill() throws SQLException{
 		ResultSet me;

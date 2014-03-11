@@ -26,8 +26,8 @@ public class CustomerRunner {
 		
 		//link the controllers with their views and models here....
 		CartController cartController = new CartController(cartView, c);
-		SearchController searchController = new SearchController(searchView, searchResultsView);
-		PreviousOrdersController previousOrdersController = new PreviousOrdersController(previousOrdersView);
+		SearchController searchController = new SearchController(searchView, searchResultsView, c);
+		PreviousOrdersController previousOrdersController = new PreviousOrdersController(previousOrdersView, cust_id);
 		
 		CustomerHomeController customerHomeController = new CustomerHomeController(
 				homeView, cartView, cartController, previousOrdersView, previousOrdersController, searchView);
