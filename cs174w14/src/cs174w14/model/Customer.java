@@ -113,6 +113,66 @@ public class Customer implements ModelDataObject {
 		return this.manager;
 	}
 
+	public void setCust_id(String cust_id) {
+		this.cust_id = cust_id;
+	}
+
+	public void setPwd_hash(String pwd_hash) {
+		this.pwd_hash = pwd_hash;
+	}
+
+	public void setSalt(String salt) {
+		this.salt = salt;
+	}
+
+	public void setFirst_name(String first_name) {
+		this.first_name = first_name;
+	}
+
+	public void setMiddle_name(String middle_name) {
+		this.middle_name = middle_name;
+	}
+
+	public void setLast_name(String last_name) {
+		this.last_name = last_name;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setAddress_addr(String address_addr) {
+		this.address_addr = address_addr;
+	}
+
+	public void setCity_addr(String city_addr) {
+		this.city_addr = city_addr;
+	}
+
+	public void setState_addr(String state_addr) {
+		this.state_addr = state_addr;
+	}
+
+	public void setZip_addr(String zip_addr) {
+		this.zip_addr = zip_addr;
+	}
+
+	public void setLoyalty(Character loyalty) {
+		this.loyalty = loyalty;
+	}
+
+	public void setLoyalty_temp(Character loyalty_temp) {
+		this.loyalty_temp = loyalty_temp;
+	}
+
+	public void setLoyalty_expiration(int loyalty_expiration) {
+		this.loyalty_expiration = loyalty_expiration;
+	}
+
+	public void setManager(boolean manager) {
+		this.manager = manager;
+	}
+
 	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(
 				"SELECT * FROM Customers WHERE cust_id='"+this.cust_id+"'");
@@ -158,7 +218,7 @@ public class Customer implements ModelDataObject {
 					+"loyalty='"+this.loyalty+"', "
 					+"loyalty_temp='"+this.loyalty_temp+"', "
 					+"loyalty_expiration="+this.loyalty_expiration+", "
-					+"manager='"+(this.manager? "T" : "F")+"'"
+					+"manager='"+(this.manager? "T" : "F")+"' "
 					+"WHERE cust_id='"+this.cust_id+"'").close();
 			ConnectionManager.clean();
 			return true;

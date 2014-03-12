@@ -15,6 +15,23 @@ public class LoyaltyClass implements ModelDataObject {
 	public LoyaltyClass(char _id){
 		this.id=_id;
 	}
+	
+	public LoyaltyClass(String name){
+		this.name=name;
+		try{
+			ResultSet rs = ConnectionManager.runQuery(
+					"SELECT * FROM Loyalty WHERE name='"+name+"'");
+			if(rs.next()){
+				fillFromResultSet(rs);
+			}
+			else{
+				System.err.println("Tried to find nonexistent loyalty class: "+name);
+				//do nothing
+			}
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+		}
+	}
 
 	public LoyaltyClass(char _id, int ship_hand_pct, int discount_pct, String name, int min_purchase, int s_h_cutoff){
 		this.id=_id;
@@ -59,6 +76,7 @@ public class LoyaltyClass implements ModelDataObject {
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
+		this.id=rs.getString("id").charAt(0);
 		this.shipping_handling_pct=rs.getInt("ship_hand");
 		this.discount_pct=rs.getInt("pct_discount");
 		this.name=rs.getString("name");

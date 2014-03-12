@@ -2,9 +2,14 @@ package cs174w14.control;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cs174w14.model.Customer;
+import cs174w14.model.LoyaltyClass;
+import cs174w14.model.ManagerUtils;
+import cs174w14.model.Product;
 import cs174w14.view.ManagerHomeView;
 import cs174w14.view.ManufactureOrderView;
 import cs174w14.view.MonthlySalesSummaryView;
@@ -14,18 +19,18 @@ public class ManagerHomeController {
 	final ManagerHomeView managerHomeView;
 	final MonthlySalesSummaryView monthlySalesSummaryView;
 	final ManufactureOrderView manufactureOrderView;
-	
+
 	public ManagerHomeController(ManagerHomeView mhView, MonthlySalesSummaryView mssView, ManufactureOrderView moView) {
 		managerHomeView = mhView;
 		monthlySalesSummaryView = mssView;
 		manufactureOrderView = moView;
-		
+
 		mhView.addPrintReportButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				printMonthlyReport(managerHomeView.getSummaryMonth());
 			}
 		});
-		
+
 		mhView.addUpdateStatusButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateCustomerStatus(
@@ -34,7 +39,7 @@ public class ManagerHomeController {
 						managerHomeView.getStatusExpiration());
 			}
 		});
-		
+
 		mhView.addUpdatePriceButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateProductPrice(
@@ -42,29 +47,29 @@ public class ManagerHomeController {
 						managerHomeView.getPriceCents());
 			}
 		});
-		
+
 		mhView.addSendOrderButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				manufactureOrderView.refresh();
 				manufactureOrderView.setVisible(true);
 			}
 		});
-		
+
 		mhView.addDeleteTransactionsButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				deleteTransactions();
 			}
 		});
 	}
-	
+
 	public void printMonthlyReport(String summaryMonth) {
 		//TODO: get the highest paying customer, product sales info and
 		//category sales info and set it to the monthlySalesSummaryView as below:
-		
+
 		List<String[]> productSalesInfo = new ArrayList<String[]>();
 		productSalesInfo.add(new String[] {"AA4823", "200", "102400"});
 		productSalesInfo.add(new String[] {"AA3834", "400", "1899"});
-		
+
 		List<String[]> categorySalesInfo = new ArrayList<String[]>();
 		categorySalesInfo.add(new String[] {"Laptop", "200", "102400"});
 		categorySalesInfo.add(new String[] {"Keyboard", "400", "1899"});
@@ -73,22 +78,37 @@ public class ManagerHomeController {
 		monthlySalesSummaryView.setCategorySales(categorySalesInfo);
 		monthlySalesSummaryView.setVisible(true);
 	}
-	
+
 	public void updateCustomerStatus(String customerID, String status, String expiration) {
-		//TODO:
+		try{
+			Customer c = new Customer(customerID);
+			c.fill();
+			LoyaltyClass lc = new LoyaltyClass(status);
+			c.setLoyalty(lc.getId());
+			c.setLoyalty_expiration(1);
+			c.push();
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+		}	
 	}
-	
+
 	public void updateProductPrice(String stockNumber, int priceCents) {
-		//TODO
+		try{
+			Product p = new Product(stockNumber);
+			p.fill();
+			p.setPriceCents(priceCents);
+			p.push();
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+		}
 	}
-	
+
 	public void deleteTransactions() {
 		final ConfirmationDialog confirmDialog = new ConfirmationDialog(
 				"Are you sure you would like to delete all  sales transactions that are no longer needed in computing customer status?");
 		confirmDialog.addConfirmButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO: add here the logic for deleting obsolete transactions
-				
+				ManagerUtils.removeOldOrderHistory();
 				confirmDialog.dispose();
 			}
 		});
