@@ -124,7 +124,7 @@ public class Customer implements ModelDataObject {
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
-		this.cust_id=rs.getString("cust_id");
+		this.cust_id=rs.getString("cust_id").trim();
 		this.pwd_hash=rs.getString("pwd_hash");
 		this.salt=rs.getString("salt");
 		this.first_name=rs.getString("f_name");
@@ -207,14 +207,18 @@ public class Customer implements ModelDataObject {
 		int prev_total=0;
 		while(rs.next()){
 			CustomerOrder o = new CustomerOrder(Integer.valueOf(rs.getString("order_num")));
-			prev_total=o.getTotal();
+			lastThree.add(o);
 		}
 		rs.close();
 		ConnectionManager.clean();
+		for(CustomerOrder o : lastThree){
+			o.fill();
+			prev_total+=o.getTotal();
+		}
 		//now get highest matching loyalty status
 		rs = ConnectionManager.runQuery(
 				"SELECT id FROM ( SELECT id FROM Loyalty "
-				+ "WHERE min_purchase<"+prev_total+" ORDER BY min_purchase DESC ) "
+				+ "WHERE min_purchase<="+prev_total+" ORDER BY min_purchase DESC ) "
 				+ "WHERE ROWNUM<=1");
 		rs.next();
 		this.loyalty = rs.getString("id").charAt(0);
