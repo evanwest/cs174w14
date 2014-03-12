@@ -18,6 +18,10 @@ public class Cart implements ModelDataObject {
 	public Cart(ResultSet rs) throws SQLException{
 		fillFromResultSet(rs);
 	}
+	
+	public String getCustomerId(){
+		return this.cust_id;
+	}
 
 	public Map<Product, Integer> getContents(){
 		return this.contents;

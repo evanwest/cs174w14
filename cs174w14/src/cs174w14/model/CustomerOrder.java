@@ -16,14 +16,14 @@ public class CustomerOrder implements ModelDataObject {
 	int total;
 	String cust_id;
 	Date order_date;
-	
+
 	Map<Product, Integer> contents;
 	LoyaltyClass loyaltyClass;
-	
+
 	public CustomerOrder(int order_num){
 		this.order_num=order_num;
 	}
-	
+
 	public CustomerOrder(int order_num, String cust_id, int subtotal, int shipping_handling, int total, char loyalty, Date order_date){
 		this.order_num=order_num;
 		this.cust_id=cust_id;
@@ -34,12 +34,36 @@ public class CustomerOrder implements ModelDataObject {
 		this.order_date=order_date;
 		this.loyaltyClass=new LoyaltyClass(loyalty_id);
 	}
-	
+
 	public CustomerOrder(ResultSet rs) throws SQLException{
 		fillFromResultSet(rs);
 	}
 
+	/**
+	 * This cart MUST be filled to give meaningful information
+	 * @param c
+	 */
+	public CustomerOrder(Cart c) throws SQLException{
+		this.order_num = getNewOrderNum();
+		this.cust_id = c.getCustomerId();
+		this.contents = c.getContents();
+		Customer cust = new Customer(c.getCustomerId());
+		cust.fill();
+		LoyaltyClass lc = new LoyaltyClass(cust.getLoyaltyExpiration()>0 ? cust.getLoyaltyTemp() : cust.getLoyalty());
+		this.loyalty_id=lc.getId();
+		this.loyaltyClass = lc;
+		this.order_date = new Date(System.currentTimeMillis());
 
+		calculateTotals();
+		//totals?
+	}
+
+
+
+	private int getNewOrderNum() {
+		//TODO: actually check order numbers here so no dupliates
+		return (int)(Math.random()*1000000000);
+	}
 
 	public int getOrderNum() {
 		return order_num;
@@ -79,7 +103,7 @@ public class CustomerOrder implements ModelDataObject {
 		}
 		return contents;
 	}
-	
+
 	@Override
 	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(
@@ -87,7 +111,7 @@ public class CustomerOrder implements ModelDataObject {
 		me.first();
 		fillFromResultSet(me);
 	}
-	
+
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.order_num=rs.getInt("order_num");
 		this.cust_id=rs.getString("cust_id");
@@ -97,7 +121,7 @@ public class CustomerOrder implements ModelDataObject {
 		this.loyalty_id=rs.getString("loyalty").charAt(0);
 		this.order_date=rs.getDate("order_date");
 	}
-	
+
 	private void loadContents() throws SQLException{
 		this.contents = new HashMap<Product, Integer>();
 		ResultSet cont = ConnectionManager.runQuery(
@@ -107,6 +131,31 @@ public class CustomerOrder implements ModelDataObject {
 			p.setOldPrice(cont.getInt("price"));
 			this.contents.put(p, cont.getInt("qty"));
 		}
+	}
+
+	/*
+	 * We assume contents are already loaded and filled
+	 */
+	private void calculateTotals() throws SQLException{
+		//need to define subtotal, ship_hand, total
+		this.subtotal=this.total=this.shipping_handling=0;
+		for(Map.Entry<Product, Integer> entry : contents.entrySet()){
+			if(entry.getKey().getPriceCents()<0){
+				System.err.println("Tried to get price from unfilled Product");
+			}
+			this.subtotal+=entry.getKey().getPriceCents();
+		}
+		shipping_handling = (subtotal*loyaltyClass.getShipping_handling_pct())/100;
+		int discount = (subtotal*loyaltyClass.getDiscount_pct())/100;
+		total=subtotal+shipping_handling-discount;
+	}
+	
+	public void recalculate() throws SQLException{
+		this.order_num=getNewOrderNum();
+		for(Product p: this.contents.keySet()){
+			p.fill();
+		}
+		calculateTotals();
 	}
 
 	@Override
@@ -136,5 +185,5 @@ public class CustomerOrder implements ModelDataObject {
 			return false;
 		}
 	}
-	
+
 }

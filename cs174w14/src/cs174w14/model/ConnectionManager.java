@@ -20,6 +20,7 @@ public class ConnectionManager {
 	}
 	
 	public static ResultSet runQuery(String query) throws SQLException{
+		System.out.println(query);
 		Statement st = ConnectionManager.dbconn.createStatement();
 		return st.executeQuery(query);
 	}

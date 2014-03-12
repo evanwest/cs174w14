@@ -2,21 +2,29 @@ package cs174w14.control;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+import cs174w14.model.Cart;
+import cs174w14.model.Product;
+import cs174w14.model.ProductSearchFactory;
+import cs174w14.model.ProductSearchQuery;
 import cs174w14.view.SearchResultsView;
 import cs174w14.view.SearchView;
-import cs174w14.view.components.CartProductPanel;
 import cs174w14.view.components.SearchResultProductPanel;
 
 public class SearchController {
 	private final SearchView searchView;
 	private final SearchResultsView searchResultsView;
+	private final Cart cart;
 	
 	//TODO: add appropriate models to this constructor
-	public SearchController(SearchView sView, SearchResultsView srView) {
+	public SearchController(SearchView sView, SearchResultsView srView, Cart c) {
 		searchView = sView;
 		searchResultsView = srView;
+		cart=c;
 		
 		//set up the action listeners
 		searchView.addSearchButtonListener(new ActionListener() {
@@ -49,12 +57,26 @@ public class SearchController {
 			String descriptionValue) {
 		
 		//TODO: perform the search query here and grab the list of results
+		ProductSearchFactory psf = new ProductSearchFactory();
+		if (accessoryOf.length()>0) psf.setAccessoryOf(accessoryOf);
+		if(stockNumber.length()>0) psf.setStockNum(stockNumber);
+		if(manufacturer.length()>0) psf.setManufacturer(manufacturer);
+		if(modelNumber.length()>0) psf.setModelNumber(modelNumber);
+		if(category.length()>0) psf.setCategory(category);
+		if(descriptionValue.length()>0) psf.setDescriptionValue(descriptionValue);
+		if(descriptionAttr.length()>0) psf.setDescriptionAttribute(descriptionAttr);
+		ProductSearchQuery ps = psf.create();
+		
+		try{
+		List<Product> results = ps.execute();
 		ArrayList<SearchResultProductPanel> searchResults = new ArrayList<SearchResultProductPanel>();
-		for (int i = 0; i < 0; i++) {
+		for (Product p : results) {
+			p.fill();
 			final String stockNum = stockNumber;
-			//TODO:fix this code to actually loop through the list of results (don't forget to fix the condition in the loop)
-			//and construct a SearchResultProductPanel for each.
-			final SearchResultProductPanel searchResultPanel = new SearchResultProductPanel(stockNum, "", "", "", "", "", "", 0);
+			final SearchResultProductPanel searchResultPanel = new SearchResultProductPanel(
+					p.getStockNum(), p.getCategory(), p.getManufacturer(), 
+					p.getModelNum(), p.getDescriptionParagraph(), String.valueOf(p.getWarranty()),
+					p.getAccessoryOfParagraph(), p.getPriceCents());
 			
 			searchResultPanel.addQuantityButtonListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -67,9 +89,26 @@ public class SearchController {
 		
 		searchView.setVisible(false);
 		searchResultsView.setVisible(true);
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+			//this is a fatal error
+		}
 	}
 	
 	public void addToCart(String stockNumber, int quantity) {
-		//TODO: Write the code to add the qty of this stockNumber to the cart model held in this class
+		try{
+			cart.fill();
+			for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet()){
+				if(entry.getKey().getStockNum().equals(stockNumber)){
+					entry.setValue(entry.getValue()+quantity);
+					return;
+				}
+			}
+			//if not found
+			cart.getContents().put(new Product(stockNumber), quantity);
+			cart.push();
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+		}
 	}
 }

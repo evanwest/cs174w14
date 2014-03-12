@@ -3,6 +3,7 @@ package cs174w14.view.components;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -30,7 +31,7 @@ public class ProductScrollPane extends JScrollPane {
 	}
 
 	//This method clears the main scrollpane and adds these JComponents to it.
-	public void setChildren(ArrayList<? extends ProductPanel> products) {
+	public void setChildren(List<? extends ProductPanel> products) {
 		productsPanel.removeAll();
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;

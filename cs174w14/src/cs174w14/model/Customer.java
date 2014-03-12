@@ -114,8 +114,9 @@ public class Customer implements ModelDataObject {
 	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(
 				"SELECT * FROM Customers WHERE cust_id='"+this.cust_id+"'");
-		me.first();
-		fillFromResultSet(me);
+		if(me.next()){
+			fillFromResultSet(me);
+		}
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{

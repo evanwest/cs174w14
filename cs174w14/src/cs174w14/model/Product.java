@@ -23,6 +23,7 @@ public class Product implements ModelDataObject {
 
 	private Map<String, String> descriptions=null;
 	private List<Product> accessories=null;
+	private List<Product> accessory_of=null;
 
 	public Product(String stock_num){
 		this.stock_num=stock_num;
@@ -171,11 +172,74 @@ public class Product implements ModelDataObject {
 			try{
 				loadAccessories();
 			} catch (SQLException sqle){
-
+				sqle.printStackTrace();
 			}
 		}
 		return this.accessories;
+	}
+	
+	public List<Product> getAccessoryOf(){
+		if(this.accessory_of==null){
+			try{
+				loadAccessoryOf();
+			} catch(SQLException sqle){
+				sqle.printStackTrace();
+			}
+		}
+		return this.accessory_of;
+	}
+	
+	public String getAccessoryOfParagraph(){
+		List<Product> acc_of = getAccessoryOf();
+		StringBuilder sb = new StringBuilder();
+		for(Product p: acc_of){
+			sb.append(p.getStockNum()+", ");
+		}
+		return sb.toString();
+	}
 
+	public void setStockNum(String stock_num) {
+		this.stock_num = stock_num;
+	}
+
+	public void setModelNum(String model_num) {
+		this.model_num = model_num;
+	}
+
+	public void setWarranty(int warranty) {
+		this.warranty = warranty;
+	}
+
+	public void setPriceCents(int price_cents) {
+		this.price_cents = price_cents;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public void setManufacturer(String manufacturer) {
+		this.manufacturer = manufacturer;
+	}
+
+	public void setQuantityInStock(int quantity_in_stock) {
+		this.quantity_in_stock = quantity_in_stock;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public void setMinimumStock(int minimum_stock) {
+		this.minimum_stock = minimum_stock;
+	}
+
+	public void setMaximumStock(int maximum_stock) {
+		this.maximum_stock = maximum_stock;
+	}
+
+	public void setReplenishmentAmt(int replenishment_amt) {
+		this.replenishment_amt = replenishment_amt;
 	}
 
 	@Override
@@ -224,9 +288,18 @@ public class Product implements ModelDataObject {
 	private void loadAccessories() throws SQLException{
 		this.accessories = new ArrayList<Product>();
 		ResultSet acc = ConnectionManager.runQuery(
-				"SELECT acc_stock_num FROM accessories WHERE acc_of_stock_num='"+this.stock_num+"'");
+				"SELECT acc_stock_num FROM accessories WHERE acc_of_stock_num='"+this.stock_num+"';");
 		while(acc.next()){
 			this.accessories.add(new Product(acc.getString("acc_stock_num")));
+		}
+	}
+	
+	private void loadAccessoryOf() throws SQLException{
+		this.accessory_of = new ArrayList<Product>();
+		ResultSet accof = ConnectionManager.runQuery(
+				"SELECT acc_of_stock_num FROM accessories WHERE acc_stock_num='"+this.stock_num+"';");
+		while(accof.next()){
+			this.accessory_of.add(new Product(accof.getString("acc_of_stock_num")));
 		}
 	}
 
