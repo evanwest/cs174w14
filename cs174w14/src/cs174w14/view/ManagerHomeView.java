@@ -135,16 +135,50 @@ public class ManagerHomeView extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
-	public void addSearchButtonListener(ActionListener buttonListener) {
-		//searchButton.addActionListener(buttonListener);
+	public void addPrintReportButtonListener(ActionListener buttonListener) {
+		printReportButton.addActionListener(buttonListener);
 	}
 	
-	public void addViewCartButtonListener(ActionListener buttonListener) {
-		//viewCartButton.addActionListener(buttonListener);
+	public void addUpdateStatusButtonListener(ActionListener buttonListener) {
+		updateStatusButton.addActionListener(buttonListener);
 	}
 	
-	public void addPreviousOrdersButtonListener(ActionListener buttonListener) {
-		//previousOrdersButton.addActionListener(buttonListener);
+	public void addUpdatePriceButtonListener(ActionListener buttonListener) {
+		updatePriceButton.addActionListener(buttonListener);
+	}
+	
+	public void addSendOrderButtonListener(ActionListener buttonListener) {
+		sendOrderButton.addActionListener(buttonListener);
+	}
+	
+	public void addDeleteTransactionsButtonListener(ActionListener buttonListener) {
+		deleteTransactionsButton.addActionListener(buttonListener);
+	}
+	
+	public String getSummaryMonth() {
+		return summaryMonthField.getText();
+	}
+	
+	public String getCustomerID() {
+		return customerIDField.getText();
+	}
+	
+	public String getCustomerStatus() {
+		return customerStatusField.getText();
+	}
+	
+	public String getStatusExpiration() {
+		return statusExpirationField.getText();
+	}
+	
+	public String getStockNumber() {
+		return stockNumberField.getText();
+	}
+	
+	public int getPriceCents() {
+		float dollars = Float.parseFloat(priceField.getText());
+		int priceCents = (int)(dollars*100.0 + 0.5);
+		return priceCents;
 	}
 	
 	public static void main(String[] args) {

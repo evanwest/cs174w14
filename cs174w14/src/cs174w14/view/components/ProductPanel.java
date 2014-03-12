@@ -199,6 +199,7 @@ public class ProductPanel extends JPanel {
 		descriptionArea = new JTextArea(description);
 		descriptionArea.setMargin(new Insets(10,10,10,10));
 		descriptionArea.setLineWrap(true);
+		descriptionArea.setWrapStyleWord(true);
 		descriptionArea.setAlignmentX(Component.LEFT_ALIGNMENT);
 		descriptionArea.setEditable(false);
 		
@@ -207,6 +208,7 @@ public class ProductPanel extends JPanel {
 		accessoryOfArea = new JTextArea(accessoryOf);
 		accessoryOfArea.setMargin(new Insets(10,10,10,10));
 		accessoryOfArea.setLineWrap(true);
+		accessoryOfArea.setWrapStyleWord(true);
 		accessoryOfArea.setAlignmentX(Component.LEFT_ALIGNMENT);
 		accessoryOfArea.setEditable(false);
 		

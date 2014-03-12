@@ -7,7 +7,8 @@ public class eMart {
 	public static void main(String[] args) {
 		LoginView loginView = new LoginView();
 		CustomerRunner customerRunner = new CustomerRunner();
-		LoginController lController = new LoginController(loginView, customerRunner);
+		ManagerRunner managerRunner = new ManagerRunner();
+		LoginController loginController = new LoginController(loginView, customerRunner, managerRunner);
 		
 		loginView.setVisible(true);
 	}
