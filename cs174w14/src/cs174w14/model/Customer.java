@@ -2,6 +2,8 @@ package cs174w14.model;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Customer implements ModelDataObject {
 
@@ -16,8 +18,8 @@ public class Customer implements ModelDataObject {
 	private String city_addr;
 	private String state_addr;
 	private String zip_addr;
-	private char loyalty;
-	private char loyalty_temp;
+	private Character loyalty;
+	private Character loyalty_temp;
 	private int loyalty_expiration;
 	private boolean manager;
 
@@ -28,7 +30,7 @@ public class Customer implements ModelDataObject {
 	public Customer(String cust_id, String pwd_hash, String salt, 
 			String f_name, String m_name, String l_name, String email, 
 			String address_addr, String city_addr, String state_addr,
-			String zip_addr, char loyalty, char loyalty_temp, 
+			String zip_addr, Character loyalty, Character loyalty_temp, 
 			int loyalty_expiration, boolean manager){
 		this.cust_id=cust_id;
 		this.pwd_hash=pwd_hash;
@@ -117,6 +119,8 @@ public class Customer implements ModelDataObject {
 		if(me.next()){
 			fillFromResultSet(me);
 		}
+		me.close();
+		ConnectionManager.clean();
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
@@ -155,7 +159,8 @@ public class Customer implements ModelDataObject {
 					+"loyalty_temp='"+this.loyalty_temp+"', "
 					+"loyalty_expiration="+this.loyalty_expiration+", "
 					+"manager='"+(this.manager? "T" : "F")+"'"
-					+"WHERE cust_id='"+this.cust_id+"';");
+					+"WHERE cust_id='"+this.cust_id+"'").close();
+			ConnectionManager.clean();
 			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
@@ -179,12 +184,41 @@ public class Customer implements ModelDataObject {
 					+"'"+this.city_addr+"', '"+this.state_addr+"', "
 					+"'"+this.zip_addr+"', '"+this.loyalty+"', "
 					+"'"+this.loyalty_temp+"', "+this.loyalty_expiration+", "
-					+"'"+(this.manager ? "T" : "F")+"');");
-
-					return true;
+					+"'"+(this.manager ? "T" : "F")+"')").close();
+			ConnectionManager.clean();
+			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
 			return false;
 		}
+	}
+	
+	/**
+	 * This will update loyalty status using previous 3 orders
+	 */
+	public void updateStatus() throws SQLException{
+		//first get previous 3 orders
+		ResultSet rs = ConnectionManager.runQuery(
+				"SELECT order_num FROM ("
+				+ "SELECT order_num, order_date FROM Orders "
+				+ "WHERE cust_id='"+this.cust_id+"' ORDER BY order_date desc"
+				+ ") WHERE ROWNUM <= 3");
+		List<CustomerOrder> lastThree = new ArrayList<CustomerOrder>();
+		int prev_total=0;
+		while(rs.next()){
+			CustomerOrder o = new CustomerOrder(Integer.valueOf(rs.getString("order_num")));
+			prev_total=o.getTotal();
+		}
+		rs.close();
+		ConnectionManager.clean();
+		//now get highest matching loyalty status
+		rs = ConnectionManager.runQuery(
+				"SELECT id FROM ( SELECT id FROM Loyalty "
+				+ "WHERE min_purchase<"+prev_total+" ORDER BY min_purchase DESC ) "
+				+ "WHERE ROWNUM<=1");
+		rs.next();
+		this.loyalty = rs.getString("id").charAt(0);
+		rs.close();
+		ConnectionManager.clean();
 	}
 }

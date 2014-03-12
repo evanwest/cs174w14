@@ -62,7 +62,7 @@ public class ProductSearchFactory {
 					+ "WHERE acc_of_stock_num='"+this.acc_of+"') AND");
 		}
 
-		query.append(" 1=1;");
+		query.append(" 1=1");
 
 		return new ProductSearchQuery(query.toString());
 	}

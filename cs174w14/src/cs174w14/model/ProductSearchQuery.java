@@ -26,6 +26,8 @@ public class ProductSearchQuery  {
 			Product item = new Product(rs);
 			this.result.add(item);
 		}
+		rs.close();
+		ConnectionManager.clean();
 		return result;
 	}
 

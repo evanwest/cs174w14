@@ -72,7 +72,7 @@ public class SearchController {
 		ArrayList<SearchResultProductPanel> searchResults = new ArrayList<SearchResultProductPanel>();
 		for (Product p : results) {
 			p.fill();
-			final String stockNum = stockNumber;
+			final String stockNum = p.getStockNum();
 			final SearchResultProductPanel searchResultPanel = new SearchResultProductPanel(
 					p.getStockNum(), p.getCategory(), p.getManufacturer(), 
 					p.getModelNum(), p.getDescriptionParagraph(), String.valueOf(p.getWarranty()),
@@ -101,6 +101,7 @@ public class SearchController {
 			for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet()){
 				if(entry.getKey().getStockNum().equals(stockNumber)){
 					entry.setValue(entry.getValue()+quantity);
+					cart.push();
 					return;
 				}
 			}

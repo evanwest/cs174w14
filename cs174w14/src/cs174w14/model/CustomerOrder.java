@@ -108,8 +108,10 @@ public class CustomerOrder implements ModelDataObject {
 	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(
 				"SELECT * FROM Orders WHERE order_num='"+this.order_num+"'");
-		me.first();
+		me.next();
 		fillFromResultSet(me);
+		me.close();
+		ConnectionManager.clean();
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
@@ -120,6 +122,8 @@ public class CustomerOrder implements ModelDataObject {
 		this.total=rs.getInt("total");
 		this.loyalty_id=rs.getString("loyalty").charAt(0);
 		this.order_date=rs.getDate("order_date");
+		this.loyaltyClass = new LoyaltyClass(this.loyalty_id);
+		this.loyaltyClass.fill();
 	}
 
 	private void loadContents() throws SQLException{
@@ -131,6 +135,8 @@ public class CustomerOrder implements ModelDataObject {
 			p.setOldPrice(cont.getInt("price"));
 			this.contents.put(p, cont.getInt("qty"));
 		}
+		cont.close();
+		ConnectionManager.clean();
 	}
 
 	/*
@@ -143,18 +149,25 @@ public class CustomerOrder implements ModelDataObject {
 			if(entry.getKey().getPriceCents()<0){
 				System.err.println("Tried to get price from unfilled Product");
 			}
-			this.subtotal+=entry.getKey().getPriceCents();
+			this.subtotal+=(entry.getKey().getPriceCents()*entry.getValue());
+		}
+		if(this.loyaltyClass.getName()==null){
+			this.loyaltyClass.fill();
 		}
 		shipping_handling = (subtotal*loyaltyClass.getShipping_handling_pct())/100;
 		int discount = (subtotal*loyaltyClass.getDiscount_pct())/100;
 		total=subtotal+shipping_handling-discount;
 	}
-	
+
 	public void recalculate() throws SQLException{
+		if(this.contents==null){
+			this.loadContents();
+		}
 		this.order_num=getNewOrderNum();
 		for(Product p: this.contents.keySet()){
 			p.fill();
 		}
+		this.loyaltyClass.fill();
 		calculateTotals();
 	}
 
@@ -169,15 +182,17 @@ public class CustomerOrder implements ModelDataObject {
 		try{
 			ConnectionManager.runQuery("INSERT INTO Orders"
 					+ "(order_num, loyalty, ship_hand, subtotal, total,"
-					+ "cust_id) VALUES ("
+					+ "cust_id, order_date) VALUES ("
 					+ this.order_num+", '"+this.loyalty_id+"', "+this.shipping_handling
-					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+");");
+					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+"', SYSDATE)").close();
+			ConnectionManager.clean();
 			for(Map.Entry<Product, Integer> entry : contents.entrySet() ){
 				// TODO: maybe call fill for all entries?
 				ConnectionManager.runQuery("INSERT INTO Order_Items "
 						+ "(order_num, stock_num, qty, price) VALUES ("
 						+ this.order_num+", '"+entry.getKey().getStockNum()+"', "
-						+ entry.getValue()+", "+entry.getKey().getPriceCents()+")");
+						+ entry.getValue()+", "+entry.getKey().getPriceCents()+")").close();
+				ConnectionManager.clean();
 			}
 			return true;
 		} catch (SQLException sqle){

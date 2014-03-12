@@ -30,8 +30,10 @@ public class Cart implements ModelDataObject {
 	@Override
 	public void fill() throws SQLException {
 		ResultSet me = ConnectionManager.runQuery(
-				"SELECT stock_num, qty FROM cart_items WHERE cust_id='"+this.cust_id+"';");
+				"SELECT stock_num, qty FROM cart_items WHERE cust_id='"+this.cust_id+"'");
 		fillFromResultSet(me);
+		me.close();
+		ConnectionManager.clean();
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
@@ -57,18 +59,22 @@ public class Cart implements ModelDataObject {
 						//delete from table
 						ConnectionManager.runQuery("DELETE FROM Cart_Items WHERE "
 								+ "stock_num='"+entry.getKey().getStockNum()+"' "
-								+ "AND cust_id='"+this.cust_id+"';");
+								+ "AND cust_id='"+this.cust_id+"'").close();
+						ConnectionManager.clean();
 					}
 					else{
 						ConnectionManager.runQuery("UPDATE Cart_Items SET"
-								+ "qty="+entry.getValue()
-								+ "WHERE stock_num='"+entry.getKey().getStockNum()+"' "
-								+ "AND cust_id='"+this.cust_id+"';");
+								+ " qty="+entry.getValue()
+								+ " WHERE stock_num='"+entry.getKey().getStockNum()+"'"
+								+ " AND cust_id='"+this.cust_id+"'").close();
+						ConnectionManager.clean();
 					}
 				}
 				else{
 					ConnectionManager.runQuery("INSERT INTO Cart_Items (cust_id, stock_num, qty) "
-							+ "VALUES ('"+this.cust_id+"', '"+entry.getKey().getStockNum()+"', "+entry.getValue()+");");
+							+ "VALUES ('"+this.cust_id+"', '"+entry.getKey().getStockNum()+"', "
+							+ entry.getValue()+")").close();
+					ConnectionManager.clean();
 				}
 			}
 			return true;

@@ -103,12 +103,15 @@ public class PreviousOrdersController {
 			public void actionPerformed(ActionEvent e) {
 				try{
 					//TODO: send to edepot?
-					//TODO: update customer status
 
 					CustomerOrder co = new CustomerOrder(Integer.valueOf(orderNo));
 					co.fill();
 					co.recalculate();
 					co.insert();
+					Customer cust = new Customer(co.getCustId());
+					cust.fill();
+					cust.updateStatus();
+					cust.push();
 					previousOrdersView.clearContents();
 					previousOrdersView.setEmptyMessage("Order number " + orderNo + " rerun as order number "+co.getOrderNum());
 					checkoutDialog.dispose();

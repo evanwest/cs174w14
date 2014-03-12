@@ -7,18 +7,22 @@ public class LoyaltyClass implements ModelDataObject {
 
 	private char id;
 	private int shipping_handling_pct;
+	private int shipping_handling_cutoff;
 	private int discount_pct;
+	private int min_purchase;
 	private String name;
 
 	public LoyaltyClass(char _id){
 		this.id=_id;
 	}
 
-	public LoyaltyClass(char _id, int ship_hand_pct, int discount_pct, String name){
+	public LoyaltyClass(char _id, int ship_hand_pct, int discount_pct, String name, int min_purchase, int s_h_cutoff){
 		this.id=_id;
 		this.shipping_handling_pct=ship_hand_pct;
+		this.shipping_handling_cutoff=s_h_cutoff;
 		this.discount_pct=discount_pct;
 		this.name=name;
+		this.min_purchase=min_purchase;
 	}
 
 	public LoyaltyClass(ResultSet rs) throws SQLException{
@@ -40,18 +44,26 @@ public class LoyaltyClass implements ModelDataObject {
 	public String getName() {
 		return name;
 	}
+	
+	public int getMinPurchase(){
+		return this.min_purchase;
+	}
 
 	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(
 				"SELECT * FROM Loyalty WHERE id='"+this.id+"'");
-		me.first();
+		me.next();
 		fillFromResultSet(me);
+		me.close();
+		ConnectionManager.clean();
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.shipping_handling_pct=rs.getInt("ship_hand");
-		this.discount_pct=rs.getInt("discount");
+		this.discount_pct=rs.getInt("pct_discount");
 		this.name=rs.getString("name");
+		this.min_purchase=rs.getInt("min_purchase");
+		this.shipping_handling_cutoff=rs.getInt("s_h_cutoff");
 	}
 
 	@Override
@@ -60,8 +72,11 @@ public class LoyaltyClass implements ModelDataObject {
 			ConnectionManager.runQuery("UPDATE Loyalty SET"
 					+ "name='"+this.name+"', "
 					+ "pct_discount="+this.discount_pct+", "
-					+ "ship_hand="+this.shipping_handling_pct
-					+ "WHERE id='"+this.id+"';");
+					+ "ship_hand="+this.shipping_handling_pct+", "
+					+ "min_purchase="+this.min_purchase+", "
+					+ "s_h_cutoff="+this.shipping_handling_cutoff+" "
+					+ "WHERE id='"+this.id+"'").close();
+			ConnectionManager.clean();
 			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
@@ -76,9 +91,11 @@ public class LoyaltyClass implements ModelDataObject {
 				return false;
 			}
 			ConnectionManager.runQuery("INSERT INTO Loyalty "
-					+ "(id, name, pct_discount, ship_hand)"
-					+ "VALUES ('"+this.id+"', '"+this.name+", "
-					+ this.discount_pct+", "+this.shipping_handling_pct+");");
+					+ "(id, name, pct_discount, ship_hand, min_purchase, s_h_cutoff)"
+					+ " VALUES ('"+this.id+"', '"+this.name+"', "
+					+ this.discount_pct+", "+this.shipping_handling_pct
+					+ ", "+this.min_purchase+", "+this.shipping_handling_cutoff+")").close();
+			ConnectionManager.clean();
 			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();

@@ -6,7 +6,11 @@ import cs174w14.view.ManufactureOrderView;
 import cs174w14.view.MonthlySalesSummaryView;
 
 public class ManagerRunner {
-	public void run() {
+	private String username;
+	
+	public void run(String username) {
+		
+		this.username = username;
 		//all of the views are initialized, all are initially invisible.
 		ManagerHomeView homeView = new ManagerHomeView();
 		ManufactureOrderView orderView = new ManufactureOrderView();

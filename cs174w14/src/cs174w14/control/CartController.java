@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import cs174w14.model.Cart;
+import cs174w14.model.ConnectionManager;
 import cs174w14.model.Customer;
 import cs174w14.model.CustomerOrder;
 import cs174w14.model.LoyaltyClass;
@@ -100,11 +101,10 @@ public class CartController {
 			System.err.println("Error loading info for customer: "+cart.getCustomerId());
 			sqle.printStackTrace();
 		}
-
+		
 		final CheckoutDialog checkoutDialog = new CheckoutDialog(subtotal, discount, ship_hand);
 		checkoutDialog.addConfirmButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO: add here the logic for checking out from the model
 				//turn this cart into an order, (TODO: pass to store_orders later)
 				CustomerOrder co;
 				try{
@@ -124,19 +124,23 @@ public class CartController {
 						System.err.println("Error resetting cart contents!");
 						//TODO: something useful here, this isn't a fatal error
 					}
+					
+					Customer cust = new Customer(cart.getCustomerId());
+					cust.fill();
+					cust.updateStatus();
+					cust.push();
 
 					//passed in through the constructor. remember to update customer status
-
 
 					cartView.clearContents();
 					cartView.setEmptyMessage("Successfully checked out order number: "+co.getOrderNum());
 					checkoutDialog.dispose();
 				} catch(SQLException sqle){
 					System.err.println("Error placing order!");
+					ConnectionManager.clean();
 					sqle.printStackTrace();
 					//TODO: how handle errors
 				}
-
 			}
 		});
 		checkoutDialog.addCancelButtonListener(new ActionListener() {

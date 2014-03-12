@@ -177,7 +177,7 @@ public class Product implements ModelDataObject {
 		}
 		return this.accessories;
 	}
-	
+
 	public List<Product> getAccessoryOf(){
 		if(this.accessory_of==null){
 			try{
@@ -188,7 +188,7 @@ public class Product implements ModelDataObject {
 		}
 		return this.accessory_of;
 	}
-	
+
 	public String getAccessoryOfParagraph(){
 		List<Product> acc_of = getAccessoryOf();
 		StringBuilder sb = new StringBuilder();
@@ -251,19 +251,21 @@ public class Product implements ModelDataObject {
 		} 
 		else if(this.manufacturer!=null && this.model_num!=null){
 			me = ConnectionManager.runQuery(
-					"SELECT * FROM Products WHERE model_num='"+this.model_num+"' AND mfr='"+this.manufacturer+"';");
+					"SELECT * FROM Products WHERE model_num='"+this.model_num+"' AND mfr='"+this.manufacturer+"'");
 		}
 		else{
 			//serious problem
 			return;
 		}
-		me.first();
+		me.next();
 		fillFromResultSet(me);
+		me.close();
+		ConnectionManager.clean();
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.stock_num=rs.getString("stock_num");
-		this.manufacturer=rs.getString("manufacturer");
+		this.manufacturer=rs.getString("mfr");
 		this.model_num=rs.getString("model_num");
 		this.category=rs.getString("category");
 		this.price_cents=rs.getInt("price");
@@ -283,24 +285,30 @@ public class Product implements ModelDataObject {
 		while(desc.next()){
 			this.descriptions.put(desc.getString("attr"), desc.getString("val"));
 		}
+		desc.close();
+		ConnectionManager.clean();
 	}
 
 	private void loadAccessories() throws SQLException{
 		this.accessories = new ArrayList<Product>();
 		ResultSet acc = ConnectionManager.runQuery(
-				"SELECT acc_stock_num FROM accessories WHERE acc_of_stock_num='"+this.stock_num+"';");
+				"SELECT acc_stock_num FROM accessories WHERE acc_of_stock_num='"+this.stock_num+"'");
 		while(acc.next()){
 			this.accessories.add(new Product(acc.getString("acc_stock_num")));
 		}
+		acc.close();
+		ConnectionManager.clean();
 	}
-	
+
 	private void loadAccessoryOf() throws SQLException{
 		this.accessory_of = new ArrayList<Product>();
 		ResultSet accof = ConnectionManager.runQuery(
-				"SELECT acc_of_stock_num FROM accessories WHERE acc_stock_num='"+this.stock_num+"';");
+				"SELECT acc_of_stock_num FROM accessories WHERE acc_stock_num='"+this.stock_num+"'");
 		while(accof.next()){
 			this.accessory_of.add(new Product(accof.getString("acc_of_stock_num")));
 		}
+		accof.close();
+		ConnectionManager.clean();
 	}
 
 	/**
@@ -320,7 +328,8 @@ public class Product implements ModelDataObject {
 					+ "min_num="+this.minimum_stock+","
 					+ "max_num="+this.maximum_stock+","
 					+ "replenishment="+this.replenishment_amt
-					+ " WHERE stock_num='"+this.stock_num+"';");
+					+ " WHERE stock_num='"+this.stock_num+"'").close();
+			ConnectionManager.clean();
 			//TODO: update accessories and descriptions
 			return true;
 		} catch(SQLException sqle){
@@ -334,25 +343,39 @@ public class Product implements ModelDataObject {
 		try{
 			ConnectionManager.runQuery("INSERT INTO Products ("
 					+"stock_num, model_num, mfr, category, location,"
-					+ "warranty, price, qty, min_num, max_num, replenishent)"
-					+ "VALUES ('"+this.stock_num+"', '"+this.model_num+"', "
+					+ "warranty, price, qty, min_num, max_num, replenishment)"
+					+ " VALUES ('"+this.stock_num+"', '"+this.model_num+"', "
 					+ "'"+this.manufacturer+"', '"+this.category+"', "
 					+ "'"+this.location+"', "+this.warranty+", "
 					+ this.price_cents+", "+this.quantity_in_stock+", "
 					+ this.minimum_stock+", "+this.maximum_stock+", "
-					+ this.replenishment_amt+");");
-					
+					+ this.replenishment_amt+")").close();
+			ConnectionManager.clean();
+
 			//now need to insert descriptions
-			for(Map.Entry<String, String> entry : this.descriptions.entrySet()){
-				ConnectionManager.runQuery("INSERT INTO Descriptions "
-						+ "(stock_num, attr, val) VALUES ("
-						+ "'"+this.stock_num+"', '"+entry.getKey()+"', '"+entry.getValue()+"' );");
+			if(this.descriptions!=null){
+				for(Map.Entry<String, String> entry : this.descriptions.entrySet()){
+					ConnectionManager.runQuery("INSERT INTO Descriptions "
+							+ "(stock_num, attr, val) VALUES ("
+							+ "'"+this.stock_num+"', '"+entry.getKey()+"', '"+entry.getValue()+"' )").close();
+					ConnectionManager.clean();
+				}
 			}
 			//now insert accessories
-			for(Product entry : this.accessories){
-				ConnectionManager.runQuery("INSERT INTO Accessories "
-						+ "(acc_of_stock_num, acc_stock_num) VALUES "
-						+ "'"+this.stock_num+"', '"+entry.getStockNum()+"');");
+			if(this.accessories!=null){
+				for(Product entry : this.accessories){
+					ConnectionManager.runQuery("INSERT INTO Accessories "
+							+ "(acc_of_stock_num, acc_stock_num) VALUES "
+							+ "'"+this.stock_num+"', '"+entry.getStockNum()+"')");
+				}
+			}
+			else if(this.accessory_of!=null){
+				for(Product entry : this.accessory_of){
+					ConnectionManager.runQuery("INSERT INTO Accessories "
+							+ "(acc_of_stock_num, acc_stock_num) VALUES "
+							+ "'"+entry.getStockNum()+"', '"+this.stock_num+"')");
+
+				}
 			}
 			return true;
 		} catch(SQLException sqle){

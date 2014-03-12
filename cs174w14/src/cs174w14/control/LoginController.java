@@ -15,11 +15,12 @@ import cs174w14.view.LoginView;
 public class LoginController {
 	private final LoginView loginView;
 	private final CustomerRunner customerRunner;
-
-	public LoginController(LoginView lView, CustomerRunner customerRunner) {
+	private final ManagerRunner managerRunner;
+	public LoginController(LoginView lView, CustomerRunner customerRunner, ManagerRunner managerRunner) {
 		loginView = lView;
 
 		this.customerRunner = customerRunner;
+		this.managerRunner = managerRunner;
 
 		//set up the action listeners
 		loginView.addLoginButtonListener(new ActionListener() {
@@ -34,19 +35,19 @@ public class LoginController {
 		//TODO: perform login, determine if is customer manager.
 		// if customer, do:
 		loginView.dispose();
-		managerRunner.run();
 		String hash=password;
 		try{
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(password.getBytes("UTF-8"));
-			hash = bytesToHex(md.digest());
 			Customer c = new Customer(username);
 			c.fill();
+			String pwd_to_hash = password+c.getSalt();
+			md.update((password+c.getSalt()).getBytes("UTF-8"));
+			hash = bytesToHex(md.digest());
 			if(c.getPwdHash().equals(hash)){
 				//login success
 				if(c.getManager()){
 					loginView.dispose();
-					//managerRunner.run(username);
+					managerRunner.run(username);
 				} 
 				else{
 					loginView.dispose();
@@ -55,6 +56,7 @@ public class LoginController {
 			}
 			else{
 				//login failure, return to login page
+				System.err.println("Login incorrect!");
 			}
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e){
 			//trust me, this won't happen
