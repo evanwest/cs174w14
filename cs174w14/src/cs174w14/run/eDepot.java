@@ -18,8 +18,8 @@ public class eDepot {
 			System.exit(1);
 		}
 		
-		EDepotRunner eDepotRunner = new EDepotRunner();
-		eDepotRunner.run();
+		//EDepotRunner eDepotRunner = new EDepotRunner();
+		//eDepotRunner.run();
 
 	}
 	

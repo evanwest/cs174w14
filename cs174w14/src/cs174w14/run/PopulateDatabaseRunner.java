@@ -101,8 +101,8 @@ public class PopulateDatabaseRunner {
 		try{
 			ConnectionManager.init();
 			//insertLoyalties();
-			insertUsers();
-			//insertProducts();
+			//insertUsers();
+			insertProducts();
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
 		} finally{

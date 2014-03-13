@@ -258,11 +258,11 @@ public class Product implements ModelDataObject {
 		ResultSet me;
 		if(this.stock_num!=null){
 			me = ConnectionManager.runQuery(
-					"SELECT * FROM Products WHERE stock_num='"+this.stock_num+"'");
+					"SELECT * FROM Products NATURAL JOIN Depot_Products WHERE stock_num='"+this.stock_num+"'");
 		} 
 		else if(this.manufacturer!=null && this.model_num!=null){
 			me = ConnectionManager.runQuery(
-					"SELECT * FROM Products WHERE model_num='"+this.model_num+"' AND mfr='"+this.manufacturer+"'");
+					"SELECT * FROM Products NATURAL JOIN Depot_Products WHERE model_num='"+this.model_num+"' AND mfr='"+this.manufacturer+"'");
 		}
 		else{
 			//serious problem
@@ -327,6 +327,8 @@ public class Product implements ModelDataObject {
 	 * This should only be called when this has already been filled
 	 * or you're really, really sure everything is correct and want
 	 * to insert into the table (insert nonfunctional at present)
+	 * 
+	 * No changing mfr/model, stock_num!
 	 */
 	@Override
 	public boolean push() {
@@ -335,6 +337,9 @@ public class Product implements ModelDataObject {
 					+ "warranty="+this.warranty+", "
 					+ "price="+this.price_cents+", "
 					+ "category='"+this.category+"', "
+					+ " WHERE stock_num='"+this.stock_num+"'").close();
+			ConnectionManager.clean();
+			ConnectionManager.runQuery("UPDATE Depot_Products SET "
 					+ "qty="+this.quantity_in_stock+", "
 					+ "location='"+this.location+"', "
 					+ "min_num="+this.minimum_stock+", "
@@ -353,17 +358,26 @@ public class Product implements ModelDataObject {
 	@Override
 	public boolean insert() {
 		try{
+			//insert into mart products
+			
 			ConnectionManager.runQuery("INSERT INTO Products ("
-					+"stock_num, model_num, mfr, category, location,"
-					+ "warranty, price, qty, min_num, max_num, replenishment)"
+					+"stock_num, model_num, mfr, category,"
+					+ "warranty, price)"
 					+ " VALUES ('"+this.stock_num+"', '"+this.model_num+"', "
 					+ "'"+this.manufacturer+"', '"+this.category+"', "
-					+ "'"+this.location+"', "+this.warranty+", "
-					+ this.price_cents+", "+this.quantity_in_stock+", "
-					+ this.minimum_stock+", "+this.maximum_stock+", "
-					+ this.replenishment_amt+")").close();
+					+ this.warranty+", "+this.price_cents+")").close();
 			ConnectionManager.clean();
-
+			
+			
+			ConnectionManager.runQuery("INSERT INTO Depot_Products ( "
+					+ "stock_num, model_num, mfr, qty, location, "
+					+ "min_num, max_num, replenishment) VALUES "
+					+ "( '"+this.stock_num+"', '"+this.model_num+"', "
+					+ "'"+this.manufacturer+"', "+this.quantity_in_stock+", "
+					+ "'"+this.location+"', "+this.minimum_stock+", "
+					+ this.maximum_stock+", "+this.replenishment_amt+" )");
+			ConnectionManager.clean();
+			
 			//now need to insert descriptions
 			if(this.descriptions!=null){
 				for(Map.Entry<String, String> entry : this.descriptions.entrySet()){

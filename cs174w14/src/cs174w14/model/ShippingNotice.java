@@ -144,9 +144,9 @@ public class ShippingNotice implements ModelDataObject{
 			}
 			//now modify replenishment in products
 			ConnectionManager.runQuery(
-					"UPDATE Products SET (replenishment) = ("
+					"UPDATE Depot_Products SET (replenishment) = ("
 							+ "SELECT (p.replenishment+sni.qty) AS replenishment "
-							+ "FROM Products p, Shipping_Notice_Items sni "
+							+ "FROM Depot_Products p, Shipping_Notice_Items sni "
 							+ "WHERE p.stock_num=sni.stock_num AND sni.ship_id="+this.ship_id).close();
 			ConnectionManager.clean();
 			return true;
@@ -180,9 +180,9 @@ public class ShippingNotice implements ModelDataObject{
 		try{
 			//modify replenishment (sub) and qty (add)
 			ConnectionManager.runQuery(
-					"UPDATE Products SET (replenishment, qty) = ("
+					"UPDATE Depot_Products SET (replenishment, qty) = ("
 							+ "SELECT (p.replenishment-sni.qty) AS replenishment,"
-							+ "(p.qty+sni.qty) AS qty FROM Products p, Shipping_Notice_Items sni"
+							+ "(p.qty+sni.qty) AS qty FROM Depot_Products p, Shipping_Notice_Items sni"
 							+ "WHERE p.stock_num=sni.stock_num AND sni.ship_id="+this.ship_id).close();
 			//delete this notice
 			delete();

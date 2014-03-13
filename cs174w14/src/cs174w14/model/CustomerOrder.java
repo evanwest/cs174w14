@@ -9,28 +9,31 @@ import java.util.Map;
 public class CustomerOrder implements ModelDataObject {
 	int order_num;
 	char loyalty_id;
-	int shipping_handling;
+	int ship_hand_paid;
+	int pct_ship_hand;
 	int subtotal;
+	int amt_ship_hand;
 	int total;
+	int pct_discount;
 	String cust_id;
 	Date order_date;
 
 	Map<Product, Integer> contents;
-	LoyaltyClass loyaltyClass;
 
 	public CustomerOrder(int order_num){
 		this.order_num=order_num;
 	}
 
-	public CustomerOrder(int order_num, String cust_id, int subtotal, int shipping_handling, int total, char loyalty, Date order_date){
+	public CustomerOrder(int order_num, String cust_id, char loyalty, int pct_discount, int pct_ship_hand, Date order_date){
 		this.order_num=order_num;
 		this.cust_id=cust_id;
-		this.subtotal=subtotal;
-		this.shipping_handling=shipping_handling;
-		this.total=total;
+		this.pct_discount=pct_discount;
+		this.pct_ship_hand=pct_ship_hand;
 		this.loyalty_id=loyalty;
 		this.order_date=order_date;
-		this.loyaltyClass=new LoyaltyClass(loyalty_id);
+		this.total=-1;
+		this.subtotal=-1;
+		this.ship_hand_paid=-1;
 	}
 
 	public CustomerOrder(ResultSet rs) throws SQLException{
@@ -49,7 +52,8 @@ public class CustomerOrder implements ModelDataObject {
 		cust.fill();
 		LoyaltyClass lc = new LoyaltyClass(cust.getLoyaltyExpiration()>0 ? cust.getLoyaltyTemp() : cust.getLoyalty());
 		this.loyalty_id=lc.getId();
-		this.loyaltyClass = lc;
+		this.pct_discount=lc.getDiscount_pct();
+		this.pct_ship_hand=lc.getShipping_handling_pct();
 		this.order_date = new Date(System.currentTimeMillis());
 
 		calculateTotals();
@@ -67,19 +71,36 @@ public class CustomerOrder implements ModelDataObject {
 		return order_num;
 	}
 
-	public LoyaltyClass getLoyalty() {
-		return loyaltyClass;
-	}
-
 	public int getShippingHandling() {
-		return shipping_handling;
+		if(amt_ship_hand<0){
+			try{
+				calculateTotals();
+			} catch (SQLException sqle){
+				//panic
+			}
+		}
+		return amt_ship_hand;
 	}
 
 	public int getSubtotal() {
+		if(subtotal<0){
+			try{
+				calculateTotals();
+			} catch (SQLException sqle){
+				//panic
+			}
+		}
 		return subtotal;
 	}
 
 	public int getTotal() {
+		if(total<0){
+			try{
+				calculateTotals();
+			} catch (SQLException sqle){
+				//panic
+			}
+		}
 		return total;
 	}
 
@@ -115,13 +136,10 @@ public class CustomerOrder implements ModelDataObject {
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.order_num=rs.getInt("order_num");
 		this.cust_id=rs.getString("cust_id");
-		this.subtotal=rs.getInt("subtotal");
-		this.shipping_handling=rs.getInt("ship_hand");
-		this.total=rs.getInt("total");
+		this.pct_discount=rs.getInt("discount");
+		this.pct_ship_hand=rs.getInt("ship_hand_pct");
 		this.loyalty_id=rs.getString("loyalty").charAt(0);
 		this.order_date=rs.getDate("order_date");
-		this.loyaltyClass = new LoyaltyClass(this.loyalty_id);
-		this.loyaltyClass.fill();
 	}
 
 	private void loadContents() throws SQLException{
@@ -142,21 +160,24 @@ public class CustomerOrder implements ModelDataObject {
 	 */
 	private void calculateTotals() throws SQLException{
 		//need to define subtotal, ship_hand, total
-		this.subtotal=this.total=this.shipping_handling=0;
+		this.subtotal=this.total=this.ship_hand_paid=0;
 		for(Map.Entry<Product, Integer> entry : contents.entrySet()){
 			if(entry.getKey().getPriceCents()<0){
 				System.err.println("Tried to get price from unfilled Product");
 			}
 			this.subtotal+=(entry.getKey().getPriceCents()*entry.getValue());
 		}
-		if(this.loyaltyClass.getName()==null){
-			this.loyaltyClass.fill();
-		}
-		shipping_handling = (subtotal*loyaltyClass.getShipping_handling_pct())/100;
-		int discount = (subtotal*loyaltyClass.getDiscount_pct())/100;
-		total=subtotal+shipping_handling-discount;
+		this.ship_hand_paid = (subtotal*pct_ship_hand)/100;
+		int discount = (subtotal*pct_discount)/100;
+		total=subtotal+ship_hand_paid-discount;
 	}
 
+	/**
+	 * Use this to prepare to re-run an order.
+	 * It will update all product prices as well as current customer loyalty status
+	 * then recalculate totals;
+	 * @throws SQLException
+	 */
 	public void recalculate() throws SQLException{
 		if(this.contents==null){
 			this.loadContents();
@@ -165,7 +186,13 @@ public class CustomerOrder implements ModelDataObject {
 		for(Product p: this.contents.keySet()){
 			p.fill();
 		}
-		this.loyaltyClass.fill();
+		Customer c = new Customer(this.cust_id);
+		c.fill();
+		this.loyalty_id=c.getLoyaltyExpiration() > 0 ? c.getLoyaltyTemp() : c.getLoyalty();
+		LoyaltyClass lc = new LoyaltyClass(this.loyalty_id);
+		lc.fill();
+		this.pct_discount=lc.getDiscount_pct();
+		this.pct_ship_hand=lc.getShipping_handling_pct();
 		calculateTotals();
 	}
 
@@ -179,10 +206,10 @@ public class CustomerOrder implements ModelDataObject {
 	public boolean insert() {
 		try{
 			ConnectionManager.runQuery("INSERT INTO Orders"
-					+ "(order_num, loyalty, ship_hand, subtotal, total,"
+					+ "(order_num, loyalty, ship_hand_pct, discount,"
 					+ "cust_id, order_date) VALUES ("
-					+ this.order_num+", '"+this.loyalty_id+"', "+this.shipping_handling
-					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+"', SYSDATE)").close();
+					+ this.order_num+", '"+this.loyalty_id+"', "+this.pct_ship_hand
+					+ ", "+this.pct_discount+", '"+this.cust_id+"', SYSDATE)").close();
 			ConnectionManager.clean();
 			for(Map.Entry<Product, Integer> entry : contents.entrySet() ){
 				// TODO: maybe call fill for all entries?
