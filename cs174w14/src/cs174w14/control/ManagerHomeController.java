@@ -15,6 +15,7 @@ import cs174w14.view.ManagerHomeView;
 import cs174w14.view.ManufactureOrderView;
 import cs174w14.view.MonthlySalesSummaryView;
 import cs174w14.view.components.ConfirmationDialog;
+import cs174w14.view.components.MessageDialog;
 
 public class ManagerHomeController {
 	final ManagerHomeView managerHomeView;
@@ -77,6 +78,9 @@ public class ManagerHomeController {
 					}
 				}
 				sn.insert();
+				
+				MessageDialog dialog = new MessageDialog("Order successfully sent to manufacturer.");
+				dialog.setVisible(true);
 			}
 		});
 	}
@@ -110,6 +114,8 @@ public class ManagerHomeController {
 			c.setLoyalty(lc.getId());
 			c.setLoyalty_expiration(1);
 			c.push();
+			MessageDialog dialog = new MessageDialog("Successfully updated customer status.");
+			dialog.setVisible(true);
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
 		}	
@@ -121,6 +127,8 @@ public class ManagerHomeController {
 			p.fill();
 			p.setPriceCents(priceCents);
 			p.push();
+			MessageDialog dialog = new MessageDialog("Price of " + stockNumber + " successfully updated to " + Utils.centsToDollarString(priceCents));
+			dialog.setVisible(true);
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
 		}
@@ -128,11 +136,13 @@ public class ManagerHomeController {
 
 	public void deleteTransactions() {
 		final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-				"Are you sure you would like to delete all  sales transactions that are no longer needed in computing customer status?");
+				"Are you sure you would like to delete all sales transactions that are no longer needed in computing customer status?");
 		confirmDialog.addConfirmButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ManagerUtils.removeOldOrderHistory();
 				confirmDialog.dispose();
+				MessageDialog dialog = new MessageDialog("Successfully deleted unneeded sales transactions.");
+				dialog.setVisible(true);
 			}
 		});
 		confirmDialog.addCancelButtonListener(new ActionListener() {

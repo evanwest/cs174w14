@@ -9,6 +9,7 @@ public class PreviousOrderProductPanel extends ProductPanel {
 			String description, 
 			String warranty, 
 			String accessoryOf,
+			int inStock,
 			int priceCents,
 			int quantity) {
 		
@@ -20,6 +21,7 @@ public class PreviousOrderProductPanel extends ProductPanel {
 				description,
 				warranty,
 				accessoryOf,
+				inStock,
 				priceCents);
 		setQuantity(quantity);
 	}

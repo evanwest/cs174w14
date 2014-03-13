@@ -9,6 +9,7 @@ public class SearchResultProductPanel extends ProductPanel {
 			String description, 
 			String warranty, 
 			String accessoryOf,
+			int inStock,
 			int priceCents) {
 		super(
 				stockNumber,
@@ -18,6 +19,7 @@ public class SearchResultProductPanel extends ProductPanel {
 				description,
 				warranty,
 				accessoryOf,
+				inStock,
 				priceCents,
 				"Add to cart");
 		

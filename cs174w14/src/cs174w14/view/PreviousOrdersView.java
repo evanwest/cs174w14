@@ -17,7 +17,7 @@ import cs174w14.view.components.PreviousOrderProductPanel;
 import cs174w14.view.components.ProductScrollPane;
 
 public class PreviousOrdersView extends JFrame {
-	private static final int FRAME_WIDTH = 600;
+	private static final int FRAME_WIDTH = 640;
 	private static final int FRAME_HEIGHT = 600;
 	
 	private JTextField orderNumberField;

@@ -71,16 +71,18 @@ public class SearchController {
 		List<Product> results = ps.execute();
 		ArrayList<SearchResultProductPanel> searchResults = new ArrayList<SearchResultProductPanel>();
 		for (Product p : results) {
-			p.fill();
+			//p.fill(); //?? This line isn't needed... ps.execute calls the constructor for Product that takes a ResultSet.
 			final String stockNum = p.getStockNum();
 			final SearchResultProductPanel searchResultPanel = new SearchResultProductPanel(
 					p.getStockNum(), p.getCategory(), p.getManufacturer(), 
 					p.getModelNum(), p.getDescriptionParagraph(), String.valueOf(p.getWarranty()),
-					p.getAccessoryOfParagraph(), p.getPriceCents());
+					p.getAccessoryOfParagraph(), p.getQuantityInStock(), p.getPriceCents());
 			
 			searchResultPanel.addQuantityButtonListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					addToCart(stockNum, searchResultPanel.getQuantity());
+					int quantity = searchResultPanel.getQuantity();
+					addToCart(stockNum, quantity);
+					//decreaseStock(stockNum, quantity);
 				}
 			});
 			searchResults.add(searchResultPanel);
@@ -102,6 +104,7 @@ public class SearchController {
 				if(entry.getKey().getStockNum().equals(stockNumber)){
 					entry.setValue(entry.getValue()+quantity);
 					cart.push();
+					searchResultsView.updateInStock(stockNumber);
 					return;
 				}
 			}

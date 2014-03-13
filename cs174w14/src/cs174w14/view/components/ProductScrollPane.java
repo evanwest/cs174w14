@@ -2,8 +2,9 @@ package cs174w14.view.components;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -11,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 public class ProductScrollPane extends JScrollPane {
+	private Map<String, ProductPanel> productPanelMap;
 	private JPanel productsPanel;
 	private JLabel emptyMessageLabel;
 	
@@ -18,6 +20,8 @@ public class ProductScrollPane extends JScrollPane {
 		productsPanel = new JPanel();
 		productsPanel.setLayout(new GridBagLayout());
 		
+		productPanelMap = new HashMap<String, ProductPanel>();
+
 		emptyMessageLabel = new JLabel(emptyMessage);
 		this.setEmptyMessage(emptyMessage);
 		
@@ -33,6 +37,8 @@ public class ProductScrollPane extends JScrollPane {
 	//This method clears the main scrollpane and adds these JComponents to it.
 	public void setChildren(List<? extends ProductPanel> products) {
 		productsPanel.removeAll();
+		productPanelMap = new HashMap<String, ProductPanel>();
+		
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
@@ -43,6 +49,7 @@ public class ProductScrollPane extends JScrollPane {
 			for (; i < products.size(); i++) {
 				c.gridy = i;
 				productsPanel.add(products.get(i), c);
+				productPanelMap.put(products.get(i).getStockNumber(), products.get(i));
 			}
 		}
 
@@ -64,5 +71,9 @@ public class ProductScrollPane extends JScrollPane {
 	public void setEmptyMessage(String message) {
 		emptyMessageLabel.setText(message);
 		//TODO: need to redraw here??
+	}
+	
+	public void updateInStock(String stockNumber) {
+		productPanelMap.get(stockNumber).updateInStock();
 	}
 }

@@ -18,4 +18,21 @@ public class Utils {
 		Random r = new Random();
 		return Math.abs(r.nextInt(1000000));
 	}
+	
+	public static String centsToDollarString(String priceCents) {
+		if (priceCents == null) {
+			return null;
+		}
+		int cents = Math.abs(Integer.parseInt(priceCents));
+		
+		String ret = String.format("$%d.%02d", (int)(cents/100 + 0.5), cents%100);
+		if (cents < 0) {
+			return "- " + ret;
+		}
+		return ret;
+	}
+	
+	public static String centsToDollarString(int priceCents) {
+		return centsToDollarString(String.valueOf(priceCents));
+	}
 }

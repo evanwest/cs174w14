@@ -63,7 +63,7 @@ public class CartController {
 			final String stockNumber = prod.getStockNum();
 			final CartProductPanel cartProductPanel = new CartProductPanel(stockNumber, 
 					prod.getCategory(), prod.getManufacturer(), prod.getModelNum(), prod.getDescriptionParagraph(), 
-					Integer.toString(prod.getWarranty()), prod.getAccessoryOfParagraph(), prod.getPriceCents(), qty);
+					Integer.toString(prod.getWarranty()), prod.getAccessoryOfParagraph(), prod.getQuantityInStock(), prod.getPriceCents(), qty);
 
 			cartProductPanel.addQuantityButtonListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {

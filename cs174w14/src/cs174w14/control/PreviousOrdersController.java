@@ -54,7 +54,7 @@ public class PreviousOrdersController {
 				final String stockNumber = p.getStockNum();
 				final PreviousOrderProductPanel previousOrderProductPanel = new PreviousOrderProductPanel(
 						stockNumber, p.getCategory(), p.getManufacturer(), p.getModelNum(), p.getDescriptionParagraph(),
-						String.valueOf(p.getWarranty()), p.getAccessoryOfParagraph(), p.getPriceCents(), entry.getValue());
+						String.valueOf(p.getWarranty()), p.getAccessoryOfParagraph(), p.getQuantityInStock(), p.getPriceCents(), entry.getValue());
 				previousOrderContents.add(previousOrderProductPanel);
 			}
 			previousOrdersView.setOrder(previousOrderContents);

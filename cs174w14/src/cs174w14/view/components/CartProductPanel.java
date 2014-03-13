@@ -9,6 +9,7 @@ public class CartProductPanel extends ProductPanel {
 			String description, 
 			String warranty, 
 			String accessoryOf,
+			int inStock,
 			int priceCents,
 			int quantity) {
 		
@@ -20,6 +21,7 @@ public class CartProductPanel extends ProductPanel {
 				description,
 				warranty,
 				accessoryOf,
+				inStock,
 				priceCents,
 				"Update Qty ");
 		setQuantity(quantity);

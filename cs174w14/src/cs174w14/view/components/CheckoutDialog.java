@@ -10,6 +10,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import cs174w14.model.Utils;
+
 public class CheckoutDialog extends JDialog {
 	private static final int DIALOG_WIDTH = 300;
 	private static final int DIALOG_HEIGHT = 200;
@@ -31,14 +33,14 @@ public class CheckoutDialog extends JDialog {
 		JLabel headerLabel = new JLabel("Confirm checkout:");
 		dialogPanel.add(headerLabel, BorderLayout.NORTH);
 		
-		String subtotal = String.format("$%d.%02d", (int)(subtotalCents/100 + 0.5), subtotalCents%100);
+		String subtotal = Utils.centsToDollarString(subtotalCents);
 		int discountCents = (int)(((float)subtotalCents) * (discountPercentage/100.0) + 0.5);
-		String discount = String.format("- $%d.%02d", (int)(discountCents/100 + 0.5), discountCents%100);
+		String discount =Utils.centsToDollarString(discountCents);
 		//subtotalCents -= discountCents;
 		int shippingAndHandlingCents = (int)(((float)subtotalCents) * (shippingAndHandlingPercentage/100.0) + 0.5);
-		String shippingAndHandling = String.format("$%d.%02d", (int)(shippingAndHandlingCents/100 + 0.5), shippingAndHandlingCents%100);
+		String shippingAndHandling = Utils.centsToDollarString(shippingAndHandlingCents);
 		totalCents = subtotalCents + shippingAndHandlingCents - discountCents;
-		String total = String.format("$%d.%02d", (int)(totalCents/100 + 0.5), totalCents%100);;
+		String total = Utils.centsToDollarString(totalCents);
 		
 		titlesLabel = new JLabel(String.format("<HTML><p>subtotal<BR>discount (%d%%)<BR>shipping & handling (%d%%)<BR>TOTAL</p></HTML>",
 				discountPercentage, shippingAndHandlingPercentage));

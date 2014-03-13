@@ -146,4 +146,9 @@ public class ManufactureOrderView extends JFrame {
 		view.setVisible(true);
 	}
 
+	public void clearContents() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

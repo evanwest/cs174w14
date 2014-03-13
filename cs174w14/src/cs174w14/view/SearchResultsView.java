@@ -15,7 +15,7 @@ import cs174w14.view.components.ProductScrollPane;
 import cs174w14.view.components.SearchResultProductPanel;
 
 public class SearchResultsView extends JFrame {
-	private static final int FRAME_WIDTH = 625;
+	private static final int FRAME_WIDTH = 665;
 	private static final int FRAME_HEIGHT = 600;
 	
 	private ProductScrollPane productScrollPane;
@@ -58,4 +58,7 @@ public class SearchResultsView extends JFrame {
 		backButton.addActionListener(buttonListener);
 	}
 
+	public void updateInStock(String stockNumber) {
+		productScrollPane.updateInStock(stockNumber);
+	}
 }

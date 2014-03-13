@@ -26,6 +26,9 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+import javax.swing.text.DocumentFilter.FilterBypass;
+
+import cs174w14.model.Utils;
 
 /* 
  *   |----Category----------------------------------------------|
@@ -77,6 +80,7 @@ public class ProductPanel extends JPanel {
 	private JLabel stockNumberLabel;
 	private JLabel manufacturerLabel;
 	private JLabel modelNumberLabel;
+	private final JLabel inStockLabel;
 	private JLabel priceLabel;
 	private JTextField quantityField;
 	private JButton quantityButton;
@@ -91,12 +95,13 @@ public class ProductPanel extends JPanel {
 	
 	public ProductPanel(
 			String stockNumber,
-			String category, 
+			String category,
 			String manufacturer,
 			String modelNumber,
 			String description, 
-			String warranty, 
+			String warranty,
 			String accessoryOf,
+			int inStock,
 			int priceCents,
 			String buttonLabel) {
 		
@@ -116,10 +121,25 @@ public class ProductPanel extends JPanel {
 		stockNumberLabel = new JLabel(stockNumber, SwingConstants.LEFT);
 		manufacturerLabel = new JLabel(manufacturer, SwingConstants.LEFT);
 		modelNumberLabel = new JLabel(modelNumber, SwingConstants.LEFT);
-		priceLabel = new JLabel(String.format("$%d.%02d", (int)(priceCents/100 + 0.5), priceCents%100),
+		inStockLabel = new JLabel(String.valueOf(inStock), SwingConstants.LEFT);
+		priceLabel = new JLabel(Utils.centsToDollarString(priceCents),
 				SwingConstants.RIGHT);
-		quantityField = new JTextField("1", 3);
+		
+		quantityField = new JTextField("0", 3);
+		
+		// make it so only numbers can be inputted into the qtyField.
 		((AbstractDocument)quantityField.getDocument()).setDocumentFilter(new DocumentFilter() {
+			@Override
+			public void remove(FilterBypass fb, int offset,
+					int length) throws BadLocationException {
+				String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+				
+				// if the user tries to make the field empty, make its contents = "0"
+				if (totalStr.length() == length) {
+			    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), "0", null);
+			    }
+			}
+			
 			@Override
 			public void insertString(FilterBypass fb, int off
 			                    , String str, AttributeSet attr) 
@@ -127,6 +147,18 @@ public class ProductPanel extends JPanel {
 			{
 			    // remove non-digits
 			    fb.insertString(off, str.replaceAll("\\D++", ""), attr);
+			    
+			    String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+			    String inStock = inStockLabel.getText();
+			    
+			    // if the user tries to make the field have a value higher than inStock, set its contents = inStock.
+			    if (Integer.valueOf(totalStr) > Integer.valueOf(inStock)) {
+			    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), inStock, attr);
+			    }
+			    
+			    // finally, remove leading 0's
+			    totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+			    fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), Integer.valueOf(totalStr).toString(), attr);
 			} 
 			@Override
 			public void replace(FilterBypass fb, int off
@@ -135,6 +167,18 @@ public class ProductPanel extends JPanel {
 			{
 			    // remove non-digits
 			    fb.replace(off, len, str.replaceAll("\\D++", ""), attr);
+			    
+			    String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+			    String inStock = inStockLabel.getText();
+
+			    // if the user tries to make the field have a value higher than inStock, set its contents = inStock.
+			    if (Integer.valueOf(totalStr) > Integer.valueOf(inStock)) {
+			    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), inStock, attr);
+			    }
+			    
+			    // finally, remove leading 0's
+			    totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+			    fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), Integer.valueOf(totalStr).toString(), attr);
 			}
 		});
 		quantityButton = new JButton(buttonLabel);
@@ -151,10 +195,12 @@ public class ProductPanel extends JPanel {
 		c.gridx = 2; c.gridy = 0;
 		infoGridPanel.add(new JLabel("Model #:     ", SwingConstants.LEFT), c);
 		c.gridx = 3; c.gridy = 0;
+		infoGridPanel.add(new JLabel("In stock: "), c);
+		c.gridx = 4; c.gridy = 0;
 		c.weightx = 1.0;
 		c.anchor = GridBagConstraints.EAST;
 		infoGridPanel.add(priceLabel, c);
-		c.gridx = 4; c.gridy = 0;
+		c.gridx = 5; c.gridy = 0;
 		c.weightx = 0.0;
 		infoGridPanel.add(quantityField, c);
 		//infoGridPanel row 2
@@ -167,14 +213,15 @@ public class ProductPanel extends JPanel {
 		infoGridPanel.add(manufacturerLabel, c);
 		c.gridx = 2; c.gridy = 1;
 		infoGridPanel.add(modelNumberLabel, c);
-		c.gridx = 4; c.gridy = 1;
+		c.gridx = 3; c.gridy = 1;
+		infoGridPanel.add(inStockLabel, c);
+		c.gridx = 5; c.gridy = 1;
 		infoGridPanel.add(quantityButton, c);
 		
 		this.add(infoGridPanel);
 		
 		//details
 
-		System.out.println("output:");
 		JLabel detailsLabel = new JLabel("Details:");
 		detailsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		detailsLabel.addMouseListener(new MouseListener() {
@@ -236,6 +283,7 @@ public class ProductPanel extends JPanel {
 			String description, 
 			String warranty, 
 			String accessoryOf,
+			int inStock,
 			int priceCents) {
 		this( stockNumber,
 			 category, 
@@ -244,6 +292,7 @@ public class ProductPanel extends JPanel {
 			 description, 
 			 warranty, 
 			 accessoryOf,
+			 inStock,
 			 priceCents,
 			 "");
 		this.quantityButton.setVisible(false);
@@ -270,6 +319,18 @@ public class ProductPanel extends JPanel {
 	
 	public void setQuantity(int quantity) {
 		quantityField.setText((new Integer(quantity)).toString());
+	}
+	
+	public String getStockNumber() {
+		return stockNumberLabel.getText();
+	}
+	
+	public void updateInStock() {
+		int inStock = Integer.valueOf(inStockLabel.getText());
+		int quantity = Integer.valueOf(quantityField.getText());
+		inStockLabel.setText(String.valueOf(inStock-quantity));
+		quantityField.setText("0");
+		this.repaint();
 	}
 	
 }

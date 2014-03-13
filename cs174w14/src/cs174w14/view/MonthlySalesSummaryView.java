@@ -7,11 +7,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.List;
 
-import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
+import cs174w14.model.Utils;
 import cs174w14.view.components.FootersScrollPane;
 
 public class MonthlySalesSummaryView extends JFrame {
@@ -80,15 +80,11 @@ public class MonthlySalesSummaryView extends JFrame {
 				String[] row = productSalesInfo.get(i);
 				assert row.length == 3;
 				
-				int decimalIndex = row[2].length() - 2;
-				
 				productSalesStringBuilder.append(row[0]);
 				productSalesStringBuilder.append(": (");
 				productSalesStringBuilder.append(row[1]);
-				productSalesStringBuilder.append(", $");
-				productSalesStringBuilder.append(row[2].substring(0, decimalIndex));
-				productSalesStringBuilder.append(".");
-				productSalesStringBuilder.append(row[2].substring(decimalIndex));
+				productSalesStringBuilder.append(", ");
+				productSalesStringBuilder.append(Utils.centsToDollarString(row[2]));
 				productSalesStringBuilder.append(")\n");
 			}
 		}
@@ -113,10 +109,8 @@ public class MonthlySalesSummaryView extends JFrame {
 				categorySalesStringBuilder.append(row[0]);
 				categorySalesStringBuilder.append(": (");
 				categorySalesStringBuilder.append(row[1]);
-				categorySalesStringBuilder.append(", $");
-				categorySalesStringBuilder.append(row[2].substring(0, decimalIndex));
-				categorySalesStringBuilder.append(".");
-				categorySalesStringBuilder.append(row[2].substring(decimalIndex));
+				categorySalesStringBuilder.append(", ");
+				categorySalesStringBuilder.append(Utils.centsToDollarString(row[2]));
 				categorySalesStringBuilder.append(")\n");
 			}
 		}
