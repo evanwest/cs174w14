@@ -1,5 +1,7 @@
 package cs174w14.model;
 
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Random;
 
 public class Utils {
@@ -11,7 +13,23 @@ public class Utils {
 		for(int i=0; i<5; ++i){
 			snum.append(r.nextInt(10));
 		}
-		return snum.toString();
+		String stock_number = snum.toString();
+		
+		//check to make sure this stock number doesn't already exist.
+		ProductSearchFactory psf = new ProductSearchFactory();
+		psf.setStockNum(stock_number);
+		List<Product> products = null;
+		try {
+			products = psf.create().execute();
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+		}
+		
+		if (!products.isEmpty()) {
+			// if we got results from our search, try creating the stock num again
+			return generateStockNum();
+		}
+		return stock_number;
 	}
 	
 	public static int generateShippingId(){

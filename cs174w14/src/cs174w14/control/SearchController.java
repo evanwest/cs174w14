@@ -107,11 +107,11 @@ public class SearchController {
 					int numInCart = entry.getValue();
 					int numInStock = entry.getKey().getQuantityInStock();
 					if (numInCart + quantity > numInStock) {
-						MessageDialog dialog = new MessageDialog("These items were not added to your cart.\n\n" +
+						MessageDialog dialog = new MessageDialog("ALERT!\n\nThese items were not added to your cart.\n\n" +
 								"You are trying to raise the total number of this product in your cart to " + 
 								(numInCart+quantity) + ", but we only have " + numInStock + " in stock at the moment.");
 						dialog.setVisible(true);
-						// cannot add this to your cart. return without doing anything.
+						// cannot add this many to the cart. return without doing anything.
 						return;
 					}
 					entry.setValue(entry.getValue()+quantity);

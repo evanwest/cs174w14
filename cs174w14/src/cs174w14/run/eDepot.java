@@ -18,11 +18,9 @@ public class eDepot {
 			System.exit(1);
 		}
 		
-		/*needs to:
-		 * -send shipping notices
-		 * -receive replenishment orders
-		 * -
-		 */
+		EDepotRunner eDepotRunner = new EDepotRunner();
+		eDepotRunner.run();
 
 	}
+	
 }
