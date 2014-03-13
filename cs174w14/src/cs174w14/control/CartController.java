@@ -105,11 +105,11 @@ public class CartController {
 		final CheckoutDialog checkoutDialog = new CheckoutDialog(subtotal, discount, ship_hand);
 		checkoutDialog.addConfirmButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//turn this cart into an order, (TODO: pass to store_orders later)
 				CustomerOrder co;
 				try{
 					co = new CustomerOrder(cart);
 					boolean result = co.insert();
+					result &= co.sendToStore();
 					if(!result){
 						System.err.println("Error placing order!");
 						//TODO: something useful here. This is a fatal error for this op 

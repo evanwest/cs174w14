@@ -21,7 +21,7 @@ public abstract class ManagerUtils {
 		try{
 			ResultSet rs = ConnectionManager.runQuery(
 				"SELECT oi.stock_num, SUM(oi.qty) AS qty, SUM(oi.qty*oi.price) as total"
-				+ "FROM Order_Items oi, Orders o WHERE oi.order_num=o.order_num "
+				+ " FROM Order_Items oi, Orders o WHERE oi.order_num=o.order_num "
 				+ "AND to_char(order_date,'mm/YYYY')='"+month+"' "
 				+ "GROUP BY oi.stock_num");
 			List<String[]> prods = new ArrayList<String[]>();
@@ -69,13 +69,21 @@ public abstract class ManagerUtils {
 		try{
 			ResultSet rs = ConnectionManager.runQuery(
 				"SELECT o.cust_id, SUM(oi.qty*oi.price) as total"
-				+ " FROM Order_Items oi, Orders o, WHERE oi.order_num=o.order_num "
+				+ " FROM Order_Items oi, Orders o WHERE oi.order_num=o.order_num "
 				+ " AND to_char(order_date,'mm/YYYY')='"+month+"' "
 				+ " GROUP BY o.cust_id");
-			String[] result = {rs.getString("cust_id"), rs.getString("total")};
-			rs.close();
-			ConnectionManager.clean();
-			return result;
+			if(rs!=null && rs.next()){
+				String[] result = {rs.getString("cust_id"), rs.getString("total")};
+				rs.close();
+				ConnectionManager.clean();
+				return result;
+			}
+			else{
+				String[] result = {"n/a", "n/a"};
+				rs.close();
+				ConnectionManager.clean();
+				return result;
+			}
 		}catch(SQLException sqle){
 			sqle.printStackTrace();
 		} finally{

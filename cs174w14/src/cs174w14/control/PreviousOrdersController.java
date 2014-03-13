@@ -102,12 +102,11 @@ public class PreviousOrdersController {
 		checkoutDialog.addConfirmButtonListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try{
-					//TODO: send to edepot?
-
 					CustomerOrder co = new CustomerOrder(Integer.valueOf(orderNo));
 					co.fill();
 					co.recalculate();
 					co.insert();
+					co.sendToStore();
 					Customer cust = new Customer(co.getCustId());
 					cust.fill();
 					cust.updateStatus();

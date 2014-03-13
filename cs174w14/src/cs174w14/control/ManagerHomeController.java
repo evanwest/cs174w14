@@ -3,13 +3,14 @@ package cs174w14.control;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import cs174w14.model.Customer;
 import cs174w14.model.LoyaltyClass;
 import cs174w14.model.ManagerUtils;
 import cs174w14.model.Product;
+import cs174w14.model.ShippingNotice;
+import cs174w14.model.Utils;
 import cs174w14.view.ManagerHomeView;
 import cs174w14.view.ManufactureOrderView;
 import cs174w14.view.MonthlySalesSummaryView;
@@ -35,8 +36,7 @@ public class ManagerHomeController {
 			public void actionPerformed(ActionEvent e) {
 				updateCustomerStatus(
 						managerHomeView.getCustomerID(),
-						managerHomeView.getCustomerStatus(),
-						managerHomeView.getStatusExpiration());
+						managerHomeView.getCustomerStatus());
 			}
 		});
 
@@ -60,26 +60,49 @@ public class ManagerHomeController {
 				deleteTransactions();
 			}
 		});
+
+		moView.addSendOrderButtonListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ShippingNotice sn = new ShippingNotice(Utils.generateShippingId());
+
+				List<String> modelNums = manufactureOrderView.getModelNumbers();
+				List<String> qtys = manufactureOrderView.getQuantities();
+				sn.setMfr(manufactureOrderView.getManufacturer());
+				for(int i=0; i<qtys.size(); ++i){
+					try{
+						sn.addEntry(modelNums.get(i), Integer.valueOf(qtys.get(i)));
+					} catch (SQLException sqle){
+						sqle.printStackTrace();
+						continue;
+					}
+				}
+				sn.insert();
+			}
+		});
 	}
 
 	public void printMonthlyReport(String summaryMonth) {
 		//TODO: get the highest paying customer, product sales info and
 		//category sales info and set it to the monthlySalesSummaryView as below:
 
+		/*
 		List<String[]> productSalesInfo = new ArrayList<String[]>();
 		productSalesInfo.add(new String[] {"AA4823", "200", "102400"});
 		productSalesInfo.add(new String[] {"AA3834", "400", "1899"});
+		 */
 
+		/*
 		List<String[]> categorySalesInfo = new ArrayList<String[]>();
 		categorySalesInfo.add(new String[] {"Laptop", "200", "102400"});
 		categorySalesInfo.add(new String[] {"Keyboard", "400", "1899"});
-		monthlySalesSummaryView.setHighestPayingCustomer("1223");
-		monthlySalesSummaryView.setProductSales(productSalesInfo);
-		monthlySalesSummaryView.setCategorySales(categorySalesInfo);
+		 */
+		monthlySalesSummaryView.setHighestPayingCustomer(ManagerUtils.getUserReport(summaryMonth)[0]);
+		monthlySalesSummaryView.setProductSales(ManagerUtils.getProductReport(summaryMonth));
+		monthlySalesSummaryView.setCategorySales(ManagerUtils.getCategoryReport(summaryMonth));
 		monthlySalesSummaryView.setVisible(true);
 	}
 
-	public void updateCustomerStatus(String customerID, String status, String expiration) {
+	public void updateCustomerStatus(String customerID, String status) {
 		try{
 			Customer c = new Customer(customerID);
 			c.fill();

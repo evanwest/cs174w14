@@ -241,6 +241,17 @@ public class Product implements ModelDataObject {
 	public void setReplenishmentAmt(int replenishment_amt) {
 		this.replenishment_amt = replenishment_amt;
 	}
+	
+	public void setDefaults(){
+		this.category="default";
+		this.price_cents=1;
+		this.warranty=0;
+		this.quantity_in_stock=0;
+		this.location="A0";
+		this.minimum_stock=0;
+		this.maximum_stock=100;
+		this.replenishment_amt=0;
+	}
 
 	@Override
 	public void fill() throws SQLException{
@@ -257,8 +268,9 @@ public class Product implements ModelDataObject {
 			//serious problem
 			return;
 		}
-		me.next();
-		fillFromResultSet(me);
+		if(me.next()){
+			fillFromResultSet(me);
+		} //else everything remains null
 		me.close();
 		ConnectionManager.clean();
 	}
@@ -319,14 +331,14 @@ public class Product implements ModelDataObject {
 	@Override
 	public boolean push() {
 		try{
-			ConnectionManager.runQuery("UPDATE Products SET"
+			ConnectionManager.runQuery("UPDATE Products SET "
 					+ "warranty="+this.warranty+", "
-					+ "price="+this.price_cents+","
-					+ "category='"+this.category+"',"
-					+ "qty="+this.quantity_in_stock+","
-					+ "location='"+this.location+","
-					+ "min_num="+this.minimum_stock+","
-					+ "max_num="+this.maximum_stock+","
+					+ "price="+this.price_cents+", "
+					+ "category='"+this.category+"', "
+					+ "qty="+this.quantity_in_stock+", "
+					+ "location='"+this.location+"', "
+					+ "min_num="+this.minimum_stock+", "
+					+ "max_num="+this.maximum_stock+", "
 					+ "replenishment="+this.replenishment_amt
 					+ " WHERE stock_num='"+this.stock_num+"'").close();
 			ConnectionManager.clean();

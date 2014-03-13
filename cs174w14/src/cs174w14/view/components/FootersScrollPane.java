@@ -50,9 +50,14 @@ public class FootersScrollPane extends JScrollPane {
 	
 	// Removes everything in this ScrollPane but the footers.
 	public void removeAll() {
+		//TODO: Fix this thing
+		/*
 		for (; numComponents > 0; numComponents--) {
 			orderPanel.remove(numComponents-1);
 		}
+		*/
+		orderPanel.removeAll();
+		numComponents=0;
 	}
 	
 	public void removeFooters() {

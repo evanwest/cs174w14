@@ -3,9 +3,7 @@ package cs174w14.model;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CustomerOrder implements ModelDataObject {
@@ -199,6 +197,32 @@ public class CustomerOrder implements ModelDataObject {
 			sqle.printStackTrace();
 			return false;
 		}
+	}
+	
+	/**
+	 * This should only ever be called for a particular order number
+	 * @return
+	 */
+	public boolean sendToStore(){
+		try{
+			ConnectionManager.runQuery("INSERT INTO Store_Orders"
+					+ " (order_num, Date_Received) VALUES "
+					+ " ("+this.getOrderNum()+", SYSDATE)").close();
+			ConnectionManager.clean();
+			for(Map.Entry<Product, Integer> entry : this.contents.entrySet()){
+				ConnectionManager.runQuery("INSERT INTO Store_Order_Items "
+						+ " (order_num, stock_num, qty) VALUES "
+						+ " ("+this.getOrderNum()+", '"+entry.getKey().getStockNum()+"', "
+						+ entry.getValue()+") ");
+			}
+			return true;
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+		} finally{
+			ConnectionManager.clean();
+		}
+		return false;
+
 	}
 
 }

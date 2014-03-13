@@ -130,6 +130,10 @@ public class ManufactureOrderView extends JFrame {
 		return quantities;
 	}
 	
+	public String getManufacturer(){
+		return this.manufacturerField.getText();
+	}
+	
 	public void refresh() {
 		scrollPane.removeAll();
 		scrollPane.add(createPanel());

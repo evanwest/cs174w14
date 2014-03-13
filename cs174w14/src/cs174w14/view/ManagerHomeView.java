@@ -75,12 +75,18 @@ public class ManagerHomeView extends JFrame {
 		customerAdjustmentPanel.add(customerIDField);
 		customerAdjustmentPanel.add(customerStatusField);
 		customerAdjustmentPanel.add(updateStatusButton);
+		
 		customerAdjustmentPanel.add(new JLabel(""));
+		/*
 		customerAdjustmentPanel.add(new JLabel("Experiation (MM/DD/YYYY):"));
+		*/
 		customerAdjustmentPanel.add(new JLabel(""));
+		
 		customerAdjustmentPanel.add(new JLabel(""));
+		/*
 		customerAdjustmentPanel.add(statusExpirationField);
 		customerAdjustmentPanel.add(new JLabel(""));
+		*/
 		
 		//Price Adjustment
 		priceAdjustmentPanel = new JPanel();
