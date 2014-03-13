@@ -72,8 +72,4 @@ public class ProductScrollPane extends JScrollPane {
 		emptyMessageLabel.setText(message);
 		//TODO: need to redraw here??
 	}
-	
-	public void updateInStock(String stockNumber) {
-		productPanelMap.get(stockNumber).updateInStock();
-	}
 }

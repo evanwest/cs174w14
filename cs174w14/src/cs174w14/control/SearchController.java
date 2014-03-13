@@ -13,6 +13,7 @@ import cs174w14.model.ProductSearchFactory;
 import cs174w14.model.ProductSearchQuery;
 import cs174w14.view.SearchResultsView;
 import cs174w14.view.SearchView;
+import cs174w14.view.components.MessageDialog;
 import cs174w14.view.components.SearchResultProductPanel;
 
 public class SearchController {
@@ -102,15 +103,30 @@ public class SearchController {
 			cart.fill();
 			for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet()){
 				if(entry.getKey().getStockNum().equals(stockNumber)){
+					entry.getKey().fill();
+					int numInCart = entry.getValue();
+					int numInStock = entry.getKey().getQuantityInStock();
+					if (numInCart + quantity > numInStock) {
+						MessageDialog dialog = new MessageDialog("These items were not added to your cart.\n\n" +
+								"You are trying to raise the total number of this product in your cart to " + 
+								(numInCart+quantity) + ", but we only have " + numInStock + " in stock at the moment.");
+						dialog.setVisible(true);
+						// cannot add this to your cart. return without doing anything.
+						return;
+					}
 					entry.setValue(entry.getValue()+quantity);
 					cart.push();
-					searchResultsView.updateInStock(stockNumber);
+					MessageDialog success = new MessageDialog("" + quantity + " of these items were added to your cart.");
+					success.setVisible(true);
+					
 					return;
 				}
 			}
 			//if not found
 			cart.getContents().put(new Product(stockNumber), quantity);
 			cart.push();
+			MessageDialog success = new MessageDialog("" + quantity + " of these items were added to your cart.");
+			success.setVisible(true);
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
 		}

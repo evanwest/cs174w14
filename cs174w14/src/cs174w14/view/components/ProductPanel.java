@@ -325,12 +325,4 @@ public class ProductPanel extends JPanel {
 		return stockNumberLabel.getText();
 	}
 	
-	public void updateInStock() {
-		int inStock = Integer.valueOf(inStockLabel.getText());
-		int quantity = Integer.valueOf(quantityField.getText());
-		inStockLabel.setText(String.valueOf(inStock-quantity));
-		quantityField.setText("0");
-		this.repaint();
-	}
-	
 }

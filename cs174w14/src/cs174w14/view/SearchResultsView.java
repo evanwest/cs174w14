@@ -58,7 +58,4 @@ public class SearchResultsView extends JFrame {
 		backButton.addActionListener(buttonListener);
 	}
 
-	public void updateInStock(String stockNumber) {
-		productScrollPane.updateInStock(stockNumber);
-	}
 }
