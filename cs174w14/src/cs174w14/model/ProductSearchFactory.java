@@ -61,6 +61,10 @@ public class ProductSearchFactory {
 			query.append("stock_num IN (SELECT acc_stock_num FROM Accessories "
 					+ "WHERE acc_of_stock_num='"+this.acc_of+"') AND");
 		}
+		if(description_attr!=null && description_val!=null){
+			query.append("stock_num IN (SELECT stock_num FROM Descriptions "
+					+ "WHERE attr='"+this.description_attr+"' AND val='"+this.description_val+"') AND ");
+		}
 
 		query.append(" 1=1");
 

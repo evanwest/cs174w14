@@ -36,7 +36,7 @@ private static Queue<ShippingNotice> shippingNotices;
 	public static void receiveShipment(int ship_id) {
 		while (!shippingNotices.isEmpty()) {
 			ShippingNotice shippingNotice = shippingNotices.remove();
-			//shippingNotice.receive();
+			shippingNotice.receive();
 		}
 	}
 	

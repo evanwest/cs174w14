@@ -148,7 +148,7 @@ public class CustomerOrder implements ModelDataObject {
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.order_num=rs.getInt("order_num");
-		this.cust_id=rs.getString("cust_id");
+		this.cust_id=rs.getString("cust_id").trim();
 		this.pct_discount=rs.getInt("discount");
 		this.pct_ship_hand=rs.getInt("ship_hand_pct");
 		this.loyalty_id=rs.getString("loyalty").charAt(0);
@@ -160,7 +160,7 @@ public class CustomerOrder implements ModelDataObject {
 		ResultSet cont = ConnectionManager.runQuery(
 				"SELECT * FROM Order_Items WHERE order_num='"+this.order_num+"'");
 		while(cont.next()){
-			Product p = new Product(cont.getString("stock_num"));
+			Product p = new Product(cont.getString("stock_num").trim());
 			p.setOldPrice(cont.getInt("price"));
 			this.contents.put(p, cont.getInt("qty"));
 		}

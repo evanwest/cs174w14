@@ -227,7 +227,7 @@ public class ProductPanel extends JPanel {
 		detailsLabel.addMouseListener(new MouseListener() {
 			 public void mouseClicked(MouseEvent e) {
 			       if (!expanded) {
-			    	   System.out.println("clicked!");
+			    	   //System.out.println("clicked!");
 			    	   expand();
 			       }
 			       else {

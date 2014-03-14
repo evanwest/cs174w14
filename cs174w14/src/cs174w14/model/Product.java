@@ -241,7 +241,7 @@ public class Product implements ModelDataObject {
 	public void setReplenishmentAmt(int replenishment_amt) {
 		this.replenishment_amt = replenishment_amt;
 	}
-	
+
 	public void setDefaults(){
 		this.category="default";
 		this.price_cents=1;
@@ -276,10 +276,10 @@ public class Product implements ModelDataObject {
 	}
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
-		this.stock_num=rs.getString("stock_num");
-		this.manufacturer=rs.getString("mfr");
+		this.stock_num=rs.getString("stock_num").trim();
+		this.manufacturer=rs.getString("mfr").trim();
 		this.model_num=rs.getString("model_num").trim();
-		this.category=rs.getString("category");
+		this.category=rs.getString("category").trim();
 		this.price_cents=rs.getInt("price");
 		this.warranty=rs.getInt("warranty");
 		try{
@@ -288,7 +288,7 @@ public class Product implements ModelDataObject {
 			this.minimum_stock=rs.getInt("min_num");
 			this.maximum_stock=rs.getInt("max_num");
 			this.replenishment_amt=rs.getInt("replenishment");
-			this.location=rs.getString("location");
+			this.location=rs.getString("location").trim();
 		} catch(SQLException sqle){
 			//ignore
 			//weeee TROLOLOL
@@ -364,7 +364,8 @@ public class Product implements ModelDataObject {
 	public boolean insert() {
 		try{
 			//insert into mart products
-			
+
+
 			ConnectionManager.runQuery("INSERT INTO Products ("
 					+"stock_num, model_num, mfr, category,"
 					+ "warranty, price)"
@@ -372,8 +373,8 @@ public class Product implements ModelDataObject {
 					+ "'"+this.manufacturer+"', '"+this.category+"', "
 					+ this.warranty+", "+this.price_cents+")").close();
 			ConnectionManager.clean();
-			
-			
+
+
 			ConnectionManager.runQuery("INSERT INTO Depot_Products ( "
 					+ "stock_num, model_num, mfr, qty, location, "
 					+ "min_num, max_num, replenishment) VALUES "
@@ -382,7 +383,7 @@ public class Product implements ModelDataObject {
 					+ "'"+this.location+"', "+this.minimum_stock+", "
 					+ this.maximum_stock+", "+this.replenishment_amt+" )");
 			ConnectionManager.clean();
-			
+
 			//now need to insert descriptions
 			if(this.descriptions!=null){
 				for(Map.Entry<String, String> entry : this.descriptions.entrySet()){
@@ -397,14 +398,18 @@ public class Product implements ModelDataObject {
 				for(Product entry : this.accessories){
 					ConnectionManager.runQuery("INSERT INTO Accessories "
 							+ "(acc_of_stock_num, acc_stock_num) VALUES "
-							+ "'"+this.stock_num+"', '"+entry.getStockNum()+"')");
+							+ "'"+this.stock_num+"', '"+entry.getStockNum()+"')").close();
+					ConnectionManager.clean();
 				}
 			}
-			else if(this.accessory_of!=null){
+			else if(this.accessory_of!=null && this.accessory_of.size()>0){
 				for(Product entry : this.accessory_of){
-					ConnectionManager.runQuery("INSERT INTO Accessories "
-							+ "(acc_of_stock_num, acc_stock_num) VALUES "
-							+ "'"+entry.getStockNum()+"', '"+this.stock_num+"')");
+					if(entry!=null){
+						ConnectionManager.runQuery("INSERT INTO Accessories "
+								+ "(acc_of_stock_num, acc_stock_num) VALUES "
+								+ "('"+entry.getStockNum()+"', '"+this.stock_num+"')").close();
+						ConnectionManager.clean();
+					}
 
 				}
 			}

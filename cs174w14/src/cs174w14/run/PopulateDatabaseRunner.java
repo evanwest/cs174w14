@@ -164,17 +164,26 @@ public class PopulateDatabaseRunner {
 					(int)(Float.valueOf(prod[5])*100), Integer.valueOf(prod[4]),
 					Integer.valueOf(prod[7]), prod[9], Integer.valueOf(prod[6]),
 					Integer.valueOf(prod[8]), 0);
-			p.insert();
 			prods.put(prod[0], p);
 		}
 		insertDescriptions(prods);
 		insertAccessories(prods);
-		/*
-		 * 	public Product(String stock_num, String mfr, String model_num, String category, 
-			int price_cents, int warranty, int quantity, String location, int min_stock, 
-			int max_stock, int replenishment){
-			STOCK#,CATEGORY,MANU,MODEL#,WARRANTY,PRICE,Min,Qty,Max,Location
-		 */
+		//disable accessory constraints because I'm lazy
+		try{
+			ConnectionManager.runQuery("alter table Accessories disable constraint \"ACCESSORIES_FKEY_1\"");
+			ConnectionManager.runQuery("alter table Accessories disable constraint \"ACCESSORIES_FKEY_2\"");
+			for(Map.Entry<String, Product> entry : prods.entrySet()){
+				entry.getValue().insert();
+			}
+			//enable accessory constraints (still lazy)
+			ConnectionManager.runQuery("alter table Accessories enable constraint \"ACCESSORIES_FKEY_1\"");
+			ConnectionManager.runQuery("alter table Accessories enable constraint \"ACCESSORIES_FKEY_2\"");
+		}
+		catch(SQLException sqle){
+			sqle.printStackTrace();
+		} finally{
+			ConnectionManager.clean();
+		}
 	}
 
 	public static void insertDescriptions(Map<String, Product> prods){
@@ -186,7 +195,7 @@ public class PopulateDatabaseRunner {
 	}
 
 	public static void insertAccessories(Map<String, Product> prods){
-		for(String[] desc : descriptions){
+		for(String[] desc : accessories){
 			Product p, p2;
 			p = prods.get(desc[0]);
 			p2 = prods.get(desc[1]);
