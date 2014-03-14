@@ -38,6 +38,9 @@ public class CheckoutDialog extends JDialog {
 		String discount =Utils.centsToDollarString(discountCents);
 		//subtotalCents -= discountCents;
 		int shippingAndHandlingCents = (int)(((float)subtotalCents) * (shippingAndHandlingPercentage/100.0) + 0.5);
+		if(subtotalCents>100*100){
+			shippingAndHandlingCents=0;
+		}
 		String shippingAndHandling = Utils.centsToDollarString(shippingAndHandlingCents);
 		totalCents = subtotalCents + shippingAndHandlingCents - discountCents;
 		String total = Utils.centsToDollarString(totalCents);

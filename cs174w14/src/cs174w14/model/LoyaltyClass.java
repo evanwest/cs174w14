@@ -65,6 +65,10 @@ public class LoyaltyClass implements ModelDataObject {
 	public int getMinPurchase(){
 		return this.min_purchase;
 	}
+	
+	public int getShipHandCutoff(){
+		return this.shipping_handling_cutoff;
+	}
 
 	public void fill() throws SQLException{
 		ResultSet me = ConnectionManager.runQuery(

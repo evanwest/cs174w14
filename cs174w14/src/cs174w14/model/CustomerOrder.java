@@ -11,6 +11,7 @@ public class CustomerOrder implements ModelDataObject {
 	char loyalty_id;
 	int ship_hand_paid;
 	int pct_ship_hand;
+	int ship_hand_cutoff;
 	int subtotal;
 	int amt_ship_hand;
 	int total;
@@ -24,7 +25,7 @@ public class CustomerOrder implements ModelDataObject {
 		this.order_num=order_num;
 	}
 
-	public CustomerOrder(int order_num, String cust_id, char loyalty, int pct_discount, int pct_ship_hand, Date order_date){
+	public CustomerOrder(int order_num, String cust_id, char loyalty, int pct_discount, int pct_ship_hand, int s_h_cutoff, Date order_date){
 		this.order_num=order_num;
 		this.cust_id=cust_id;
 		this.pct_discount=pct_discount;
@@ -51,9 +52,11 @@ public class CustomerOrder implements ModelDataObject {
 		Customer cust = new Customer(c.getCustomerId());
 		cust.fill();
 		LoyaltyClass lc = new LoyaltyClass(cust.getLoyaltyExpiration()>0 ? cust.getLoyaltyTemp() : cust.getLoyalty());
+		lc.fill();
 		this.loyalty_id=lc.getId();
 		this.pct_discount=lc.getDiscount_pct();
 		this.pct_ship_hand=lc.getShipping_handling_pct();
+		this.ship_hand_cutoff=lc.getShipHandCutoff();
 		this.order_date = new Date(System.currentTimeMillis());
 
 		calculateTotals();
@@ -148,7 +151,7 @@ public class CustomerOrder implements ModelDataObject {
 
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.order_num=rs.getInt("order_num");
-		this.cust_id=rs.getString("cust_id");
+		this.cust_id=rs.getString("cust_id").trim();
 		this.pct_discount=rs.getInt("discount");
 		this.pct_ship_hand=rs.getInt("ship_hand_pct");
 		this.loyalty_id=rs.getString("loyalty").charAt(0);
@@ -160,7 +163,7 @@ public class CustomerOrder implements ModelDataObject {
 		ResultSet cont = ConnectionManager.runQuery(
 				"SELECT * FROM Order_Items WHERE order_num='"+this.order_num+"'");
 		while(cont.next()){
-			Product p = new Product(cont.getString("stock_num"));
+			Product p = new Product(cont.getString("stock_num").trim());
 			p.setOldPrice(cont.getInt("price"));
 			this.contents.put(p, cont.getInt("qty"));
 		}
@@ -182,6 +185,9 @@ public class CustomerOrder implements ModelDataObject {
 		}
 		this.ship_hand_paid = (subtotal*pct_ship_hand)/100;
 		int discount = (subtotal*pct_discount)/100;
+		if(subtotal > ship_hand_cutoff){
+			ship_hand_paid=0;
+		}
 		total=subtotal+ship_hand_paid-discount;
 	}
 

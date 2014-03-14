@@ -94,7 +94,7 @@ public class CartController {
 		try{
 			Customer c = new Customer(cart.getCustomerId());
 			c.fill();
-			LoyaltyClass lc = new LoyaltyClass(c.getLoyaltyExpiration()>0 ? c.getLoyalty() : c.getLoyaltyTemp());
+			LoyaltyClass lc = new LoyaltyClass(c.getLoyaltyExpiration()>0 ? c.getLoyaltyTemp() : c.getLoyalty());
 			lc.fill();
 			discount=lc.getDiscount_pct();
 			ship_hand=lc.getShipping_handling_pct();
@@ -130,6 +130,9 @@ public class CartController {
 					Customer cust = new Customer(cart.getCustomerId());
 					cust.fill();
 					cust.updateStatus();
+					if(cust.getLoyaltyExpiration()>0) {
+						cust.setLoyalty_expiration(cust.getLoyaltyExpiration()-1);
+					}
 					cust.push();
 
 					//passed in through the constructor. remember to update customer status

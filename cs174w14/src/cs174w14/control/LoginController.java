@@ -34,14 +34,18 @@ public class LoginController {
 	public void login(String username, String password) {
 		//TODO: perform login, determine if is customer manager.
 		// if customer, do:
-		loginView.dispose();
 		String hash=password;
 		try{
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			Customer c = new Customer(username);
 			c.fill();
+			if(c.getPwdHash()==null){
+				//not a valid user
+				return;
+			}
+			loginView.dispose();
 			String pwd_to_hash = password+c.getSalt();
-			md.update((password+c.getSalt()).getBytes("UTF-8"));
+			md.update((pwd_to_hash).getBytes("UTF-8"));
 			hash = bytesToHex(md.digest());
 			if(c.getPwdHash().equals(hash)){
 				//login success

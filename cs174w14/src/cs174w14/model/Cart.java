@@ -71,10 +71,12 @@ public class Cart implements ModelDataObject {
 					}
 				}
 				else{
+					if(entry.getValue()>0){
 					ConnectionManager.runQuery("INSERT INTO Cart_Items (cust_id, stock_num, qty) "
 							+ "VALUES ('"+this.cust_id+"', '"+entry.getKey().getStockNum()+"', "
 							+ entry.getValue()+")").close();
 					ConnectionManager.clean();
+					}
 				}
 			}
 			return true;
