@@ -66,7 +66,7 @@ private static Queue<ShippingNotice> shippingNotices;
 		}
 	}
 	
-	private static boolean sendReplenishmentOrder(String mfr) {
+	private static void sendReplenishmentOrder(String mfr) {
 		try {
 			//get all products to send a replenishment order for this mfr
 			ResultSet rs = ConnectionManager.runQuery(
@@ -85,7 +85,6 @@ private static Queue<ShippingNotice> shippingNotices;
 		} finally{
 			ConnectionManager.clean();
 		}
-		return false;
 	}
 	
 }

@@ -191,6 +191,12 @@ public class CustomerOrder implements ModelDataObject {
 	@Override
 	public boolean insert() {
 		try{
+			ConnectionManager.runQuery("INSERT INTO Orders"
+					+ "(order_num, loyalty, ship_hand, subtotal, total,"
+					+ "cust_id, order_date) VALUES ("
+					+ this.order_num+", '"+this.loyalty_id+"', "+this.shipping_handling
+					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+"', SYSDATE)").close();
+			ConnectionManager.clean();
 			for(Map.Entry<Product, Integer> entry : contents.entrySet() ){
 				// TODO: maybe call fill for all entries?
 				ConnectionManager.runQuery("INSERT INTO Order_Items "
@@ -199,14 +205,6 @@ public class CustomerOrder implements ModelDataObject {
 						+ entry.getValue()+", "+entry.getKey().getPriceCents()+")").close();
 				ConnectionManager.clean();
 			}
-			//!! This needs to be done last. Same reason as in
-			// ShippingNotice.insert() (see the comment there)
-			ConnectionManager.runQuery("INSERT INTO Orders"
-					+ "(order_num, loyalty, ship_hand, subtotal, total,"
-					+ "cust_id, order_date) VALUES ("
-					+ this.order_num+", '"+this.loyalty_id+"', "+this.shipping_handling
-					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+"', SYSDATE)").close();
-			ConnectionManager.clean();
 			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();

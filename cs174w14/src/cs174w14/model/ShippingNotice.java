@@ -131,6 +131,11 @@ public class ShippingNotice implements ModelDataObject{
 	@Override
 	public boolean insert() {
 		try{
+			ConnectionManager.runQuery("INSERT INTO Shipping_Notices"
+					+ "(ship_id, company, date_received) VALUES "
+					+ "("+this.ship_id+", '"+this.mfr+"', SYSDATE)").close();
+			ConnectionManager.clean();
+			
 			for(Map.Entry<Product, Integer> entry : contents.entrySet()){
 				Product p = entry.getKey();
 				//now insert into shipping_notice_items
@@ -139,15 +144,7 @@ public class ShippingNotice implements ModelDataObject{
 						+ " ('"+p.getModelNum()+"', "+this.ship_id+", "+entry.getValue()+")");
 				ConnectionManager.clean();
 			}
-			//!! This needs to be done last because eDepot is checking Shipping_Notices
-			// for notices. When it finds one, it immediately starts to process the notice 
-			// by checking Shipping_Notice_Items. But if not all items have yet been added
-			// to Shipping_Notice_Items, eDepot will not process the whole shipment and delete
-			// the notice from Shipping_Notices leaving untouched items in Shipping_Notice_Items.
-			ConnectionManager.runQuery("INSERT INTO Shipping_Notices"
-					+ "(ship_id, company, date_received) VALUES "
-					+ "("+this.ship_id+", '"+this.mfr+"', SYSDATE)").close();
-			ConnectionManager.clean();
+
 			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
