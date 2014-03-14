@@ -11,6 +11,7 @@ import cs174w14.model.Customer;
 import cs174w14.model.CustomerOrder;
 import cs174w14.model.LoyaltyClass;
 import cs174w14.model.Product;
+import cs174w14.model.eDepot;
 import cs174w14.view.PreviousOrdersView;
 import cs174w14.view.components.CheckoutDialog;
 import cs174w14.view.components.PreviousOrderProductPanel;
@@ -107,6 +108,7 @@ public class PreviousOrdersController {
 					co.recalculate();
 					co.insert();
 					co.sendToStore();
+					eDepot.fillOrder(co.getOrderNum());
 					Customer cust = new Customer(co.getCustId());
 					cust.fill();
 					cust.updateStatus();

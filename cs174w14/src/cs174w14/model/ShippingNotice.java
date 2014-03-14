@@ -67,6 +67,7 @@ public class ShippingNotice implements ModelDataObject{
 			this.contents = new HashMap<Product, Integer>();
 		}
 		//check if this is already in the map
+		//?? why would it already be in the map?
 		for(Map.Entry<Product, Integer> entry : contents.entrySet()){
 			if(model_num.equals(entry.getKey().getModelNum())){
 				entry.setValue(entry.getValue()+qty);
@@ -75,7 +76,7 @@ public class ShippingNotice implements ModelDataObject{
 		}
 		//otherwise check if there is already a stock number for this
 		Product p = new Product(mfr, model_num);
-		p.fill();
+		p.fill(); //this can fail (well not fail, but not accomplish anything. Check Product.fill() -->//serious problem
 		//now add to our list
 		this.contents.put(p,qty);
 
@@ -103,11 +104,19 @@ public class ShippingNotice implements ModelDataObject{
 		this.mfr=rs.getString("company");
 	}
 
+	/**
+	 * To bail out the user, If fill() has not been called on this object 
+	 * yet, this method will call it first.
+	 * @throws SQLException
+	 */
 	private void loadContents() throws SQLException{
+		if (this.mfr == null) {
+			this.fill();
+		}
 		ResultSet cont = ConnectionManager.runQuery(
-				"SELECT stock_num, qty FROM Shipping_Notice_Items WHERE ship_id="+this.ship_id );
+				"SELECT model_num, qty FROM Shipping_Notice_Items WHERE ship_id="+this.ship_id );
 		while(cont.next()){
-			this.contents.put(new Product(cont.getString("stock_num")), cont.getInt("qty"));
+			this.contents.put(new Product(this.mfr, cont.getString("model_num")), cont.getInt("qty"));
 		}
 		cont.close();
 		ConnectionManager.clean();
@@ -122,76 +131,102 @@ public class ShippingNotice implements ModelDataObject{
 	@Override
 	public boolean insert() {
 		try{
+			for(Map.Entry<Product, Integer> entry : contents.entrySet()){
+				Product p = entry.getKey();
+				//now insert into shipping_notice_items
+				ConnectionManager.runQuery("INSERT INTO Shipping_Notice_Items"
+						+ " (model_num, ship_id, qty) VALUES "
+						+ " ('"+p.getModelNum()+"', "+this.ship_id+", "+entry.getValue()+")");
+				ConnectionManager.clean();
+			}
+			//!! This needs to be done last because eDepot is checking Shipping_Notices
+			// for notices. When it finds one, it immediately starts to process the notice 
+			// by checking Shipping_Notice_Items. But if not all items have yet been added
+			// to Shipping_Notice_Items, eDepot will not process the whole shipment and delete
+			// the notice from Shipping_Notices leaving untouched items in Shipping_Notice_Items.
 			ConnectionManager.runQuery("INSERT INTO Shipping_Notices"
 					+ "(ship_id, company, date_received) VALUES "
 					+ "("+this.ship_id+", '"+this.mfr+"', SYSDATE)").close();
 			ConnectionManager.clean();
-			//now for all contents, if needed make new Product entries
-			for(Map.Entry<Product, Integer> entry : contents.entrySet()){
-				Product p = entry.getKey();
-				if(p.getStockNum()==null){
-					//nope, need to generate
-					String stockNum=Utils.generateStockNum();
-					p.setStockNum(stockNum);
-					p.setDefaults();
-					p.insert();
-				}
-				//now insert into shipping_notice_items
-				ConnectionManager.runQuery("INSERT INTO Shipping_Notice_Items"
-						+ " (stock_num, ship_id, qty) VALUES "
-						+ " ('"+p.getStockNum()+"', "+this.ship_id+", "+entry.getValue()+")");
-				ConnectionManager.clean();
-			}
-			//now modify replenishment in products
-			ConnectionManager.runQuery(
-					"UPDATE Products SET (replenishment) = ("
-							+ "SELECT (p.replenishment+sni.qty) AS replenishment "
-							+ "FROM Products p, Shipping_Notice_Items sni "
-							+ "WHERE p.stock_num=sni.stock_num AND sni.ship_id="+this.ship_id).close();
-			ConnectionManager.clean();
 			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
+			return false;
 		} finally{
 			ConnectionManager.clean();
 		}
-		return false;
 	}
 
-	public boolean delete(){
+	public boolean delete() {
 		try{
 			ConnectionManager.runQuery(
 					"DELETE FROM Shipping_Notices WHERE ship_id="+this.ship_id).close();
+			//!! make sure Shipping_Notice_Items has ON DELETE CASCADE 
+			return true;
 		} catch(SQLException sqle){
 			sqle.printStackTrace();
+			return false;
 		} finally{
 			ConnectionManager.clean();
 		}
-		return false;
+	}
+	
+	/**
+	 * This method is for use by eDepot only.
+	 * Call this method to process shipping this shipping notice.
+	 * It will create new stock numbers for products if necessary,
+	 * and modify replenishment for products.
+	 */
+	public boolean process() {
+		try {
+			for (Map.Entry<Product, Integer> entry : this.getContents().entrySet()) {
+				Product product = entry.getKey();
+				product.fill(); //still may not have a stock_num after this
+				if (product.getStockNum() == null) {
+					//create a stock_num if necessary, and set defaults.
+					String stockNum=Utils.generateStockNum();
+					product.setStockNum(stockNum);
+					product.setDefaults();
+					product.insert();
+				}
+				product.setReplenishmentAmt(product.getReplenishmentAmount() + entry.getValue());
+				product.push();
+			}
+			
+		return true;
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+			return false;
+		}
 	}
 
 	/**
-	 * Call this method when the shipment has arrived at the depot.
+	 * This method is for use by eDepot only.
+	 * Call this method when a shipping notice has been processed to receive the shipment.
 	 * It will modify replenishment and qty for products, then delete
 	 * this shipping notice.
 	 * @return
 	 */
-	public boolean process(){
+	public boolean receive(){
 		try{
 			//modify replenishment (sub) and qty (add)
-			ConnectionManager.runQuery(
-					"UPDATE Products SET (replenishment, qty) = ("
-							+ "SELECT (p.replenishment-sni.qty) AS replenishment,"
-							+ "(p.qty+sni.qty) AS qty FROM Products p, Shipping_Notice_Items sni"
-							+ "WHERE p.stock_num=sni.stock_num AND sni.ship_id="+this.ship_id).close();
+			for (Map.Entry<Product, Integer> entry : this.getContents().entrySet()) {
+				Product product = entry.getKey();
+				int qty = entry.getValue();
+				product.fill();
+				product.setReplenishmentAmt(product.getReplenishmentAmount()-qty);
+				product.setQuantityInStock(product.getQuantityInStock()+qty);
+				product.push();
+			}
+			
 			//delete this notice
 			delete();
+			
+			return true;
 		} catch(SQLException sqle){
 			sqle.printStackTrace();
-		} finally{
-			ConnectionManager.clean();
+			return false;
 		}
-		return false;
 	}
 
 }

@@ -12,6 +12,7 @@ import cs174w14.model.Customer;
 import cs174w14.model.CustomerOrder;
 import cs174w14.model.LoyaltyClass;
 import cs174w14.model.Product;
+import cs174w14.model.eDepot;
 import cs174w14.view.CartView;
 import cs174w14.view.components.CartProductPanel;
 import cs174w14.view.components.CheckoutDialog;
@@ -115,6 +116,7 @@ public class CartController {
 						//TODO: something useful here. This is a fatal error for this op 
 						return;
 					}
+					eDepot.fillOrder(co.getOrderNum());
 					//now reset cart contents
 					for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet() ){
 						entry.setValue(0);

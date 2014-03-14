@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import cs174w14.control.LoginController;
 import cs174w14.model.ConnectionManager;
+import cs174w14.model.eDepot;
 import cs174w14.view.LoginView;
 
 public class eMart {
@@ -14,6 +15,8 @@ public class eMart {
 			sqle.printStackTrace();
 			System.exit(1);
 		}
+		eDepot.init();
+		
 		LoginView loginView = new LoginView();
 		CustomerRunner customerRunner = new CustomerRunner();
 		ManagerRunner managerRunner = new ManagerRunner();

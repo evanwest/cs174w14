@@ -11,6 +11,7 @@ import cs174w14.model.ManagerUtils;
 import cs174w14.model.Product;
 import cs174w14.model.ShippingNotice;
 import cs174w14.model.Utils;
+import cs174w14.model.eDepot;
 import cs174w14.view.ManagerHomeView;
 import cs174w14.view.ManufactureOrderView;
 import cs174w14.view.MonthlySalesSummaryView;
@@ -78,6 +79,7 @@ public class ManagerHomeController {
 					}
 				}
 				sn.insert();
+				eDepot.processShippingNotice(sn.getShip_id());
 				
 				MessageDialog dialog = new MessageDialog("Order successfully sent to manufacturer.");
 				dialog.setVisible(true);

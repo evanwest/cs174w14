@@ -59,8 +59,21 @@ public class CustomerOrder implements ModelDataObject {
 
 
 	private int getNewOrderNum() {
-		//TODO: actually check order numbers here so no dupliates
-		return (int)(Math.random()*1000000000);
+		int newOrderNum = (int)(Math.random()*1000000000);
+		
+		try {
+			ResultSet rs = ConnectionManager.runQuery("SELECT order_num FROM Store_Orders");
+			if (rs.next()) {
+				ConnectionManager.clean();
+				return getNewOrderNum();
+			}
+
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+		}
+		
+		ConnectionManager.clean();
+		return newOrderNum;
 	}
 
 	public int getOrderNum() {
@@ -178,12 +191,6 @@ public class CustomerOrder implements ModelDataObject {
 	@Override
 	public boolean insert() {
 		try{
-			ConnectionManager.runQuery("INSERT INTO Orders"
-					+ "(order_num, loyalty, ship_hand, subtotal, total,"
-					+ "cust_id, order_date) VALUES ("
-					+ this.order_num+", '"+this.loyalty_id+"', "+this.shipping_handling
-					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+"', SYSDATE)").close();
-			ConnectionManager.clean();
 			for(Map.Entry<Product, Integer> entry : contents.entrySet() ){
 				// TODO: maybe call fill for all entries?
 				ConnectionManager.runQuery("INSERT INTO Order_Items "
@@ -192,6 +199,14 @@ public class CustomerOrder implements ModelDataObject {
 						+ entry.getValue()+", "+entry.getKey().getPriceCents()+")").close();
 				ConnectionManager.clean();
 			}
+			//!! This needs to be done last. Same reason as in
+			// ShippingNotice.insert() (see the comment there)
+			ConnectionManager.runQuery("INSERT INTO Orders"
+					+ "(order_num, loyalty, ship_hand, subtotal, total,"
+					+ "cust_id, order_date) VALUES ("
+					+ this.order_num+", '"+this.loyalty_id+"', "+this.shipping_handling
+					+ ", "+this.subtotal+", "+this.total+", '"+this.cust_id+"', SYSDATE)").close();
+			ConnectionManager.clean();
 			return true;
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
