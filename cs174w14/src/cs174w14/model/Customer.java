@@ -273,6 +273,7 @@ public class Customer implements ModelDataObject {
 		ConnectionManager.clean();
 		for(CustomerOrder o : lastThree){
 			o.fill();
+			o.getContents();
 			prev_total+=o.getTotal();
 		}
 		//now get highest matching loyalty status

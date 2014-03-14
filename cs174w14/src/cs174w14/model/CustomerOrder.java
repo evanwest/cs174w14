@@ -23,6 +23,9 @@ public class CustomerOrder implements ModelDataObject {
 
 	public CustomerOrder(int order_num){
 		this.order_num=order_num;
+		this.total=-1;
+		this.subtotal=-1;
+		this.ship_hand_paid=-1;
 	}
 
 	public CustomerOrder(int order_num, String cust_id, char loyalty, int pct_discount, int pct_ship_hand, int s_h_cutoff, Date order_date){
@@ -67,7 +70,7 @@ public class CustomerOrder implements ModelDataObject {
 
 	private int getNewOrderNum() {
 		int newOrderNum = (int)(Math.random()*1000000000);
-		
+
 		try {
 			ResultSet rs = ConnectionManager.runQuery("SELECT order_num FROM Store_Orders WHERE order_num="+newOrderNum);
 			if (rs.next()) {
@@ -78,7 +81,7 @@ public class CustomerOrder implements ModelDataObject {
 		} catch (SQLException sqle){
 			sqle.printStackTrace();
 		}
-		
+
 		ConnectionManager.clean();
 		return newOrderNum;
 	}
@@ -177,11 +180,14 @@ public class CustomerOrder implements ModelDataObject {
 	private void calculateTotals() throws SQLException{
 		//need to define subtotal, ship_hand, total
 		this.subtotal=this.total=this.ship_hand_paid=0;
-		for(Map.Entry<Product, Integer> entry : contents.entrySet()){
-			if(entry.getKey().getPriceCents()<0){
-				System.err.println("Tried to get price from unfilled Product");
+		if(contents!=null){
+			for(Map.Entry<Product, Integer> entry : contents.entrySet()){
+				entry.getKey().fill();
+				if(entry.getKey().getPriceCents()<0){
+					System.err.println("Tried to get price from unfilled Product");
+				}
+				this.subtotal+=(entry.getKey().getPriceCents()*entry.getValue());
 			}
-			this.subtotal+=(entry.getKey().getPriceCents()*entry.getValue());
 		}
 		this.ship_hand_paid = (subtotal*pct_ship_hand)/100;
 		int discount = (subtotal*pct_discount)/100;
@@ -244,7 +250,7 @@ public class CustomerOrder implements ModelDataObject {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * This should only ever be called for a particular order number
 	 * @return
