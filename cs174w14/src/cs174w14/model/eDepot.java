@@ -61,6 +61,7 @@ private static Queue<ShippingNotice> shippingNotices;
 			while (rs.next()) {
 				manufacturers.add(rs.getString("mfr"));
 			}
+			rs.close();
 			ConnectionManager.clean();
 			for (String mfr : manufacturers) {
 				sendReplenishmentOrder(mfr);
@@ -80,12 +81,13 @@ private static Queue<ShippingNotice> shippingNotices;
 			ResultSet rs = ConnectionManager.runQuery(
 					"SELECT model_num, max_num-qty AS num_to_order FROM Depot_Products " +
 					"WHERE mfr='"+mfr+"' AND qty < max_num");
-			ConnectionManager.clean();
 			
 			Map<String, Integer> shippingNoticeItems = new HashMap<String, Integer>();
 			while(rs.next()) {
 				shippingNoticeItems.put(rs.getString("model_num"), rs.getInt("num_to_order"));
 			}
+			rs.close();
+			ConnectionManager.clean();
 			ShippingNotice sn = new ShippingNotice(Utils.generateShippingId());
 			for (Map.Entry<String, Integer> entry : shippingNoticeItems.entrySet()) {
 				sn.setMfr(mfr);
