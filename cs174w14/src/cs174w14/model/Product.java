@@ -341,7 +341,7 @@ public class Product implements ModelDataObject {
 			ConnectionManager.runQuery("UPDATE Products SET "
 					+ "warranty="+this.warranty+", "
 					+ "price="+this.price_cents+", "
-					+ "category='"+this.category+"', "
+					+ "category='"+this.category+"'"
 					+ " WHERE stock_num='"+this.stock_num+"'").close();
 			ConnectionManager.clean();
 			ConnectionManager.runQuery("UPDATE Depot_Products SET "

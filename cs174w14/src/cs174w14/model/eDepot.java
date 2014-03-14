@@ -40,9 +40,9 @@ private static Queue<ShippingNotice> shippingNotices;
 		}
 	}
 	
-	public static void fillOrder(int order_num) {
+	public static List<Product> fillOrder(int order_num) {
 		try {
-			// check for orders and fill them as they come
+			System.out.println("filled order");
 			// update number in stock, send replenishment orders as necessary
 			CustomerOrder customerOrder = new CustomerOrder(order_num);
 			customerOrder.fill();
@@ -51,6 +51,7 @@ private static Queue<ShippingNotice> shippingNotices;
 				int qty = entry.getValue();
 				product.fill();
 				product.setQuantityInStock(product.getQuantityInStock()-qty);
+				product.push();
 			}
 			
 			// get all manufacturers that we need to send replenishment orders to
@@ -73,6 +74,7 @@ private static Queue<ShippingNotice> shippingNotices;
 		} finally{
 			ConnectionManager.clean();
 		}
+		return null;
 	}
 	
 	private static void sendReplenishmentOrder(String mfr) {
