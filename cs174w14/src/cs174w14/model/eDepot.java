@@ -83,6 +83,22 @@ private static Queue<ShippingNotice> shippingNotices;
 		return null;
 	}
 	
+	public static int getQuantityInStock(String stock_num) {
+		try {
+			ResultSet rs = ConnectionManager.runQuery(
+					"SELECT qty FROM Depot_Products " +
+					"WHERE stock_num='"+stock_num+"'");
+			if (rs.next()) {
+				return rs.getInt("qty");
+			} else {
+				return -1;
+			}
+		} catch (SQLException sqle){
+			sqle.printStackTrace();
+		}
+		return -1;
+	}
+	
 	private static void sendReplenishmentOrder(String mfr) {
 		try {
 			//get all products to send a replenishment order for this mfr
