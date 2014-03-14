@@ -282,6 +282,17 @@ public class Product implements ModelDataObject {
 		this.category=rs.getString("category");
 		this.price_cents=rs.getInt("price");
 		this.warranty=rs.getInt("warranty");
+		try{
+			//see if this is a superset with depot and emart cols
+			this.quantity_in_stock=rs.getInt("qty");
+			this.minimum_stock=rs.getInt("min_num");
+			this.maximum_stock=rs.getInt("max_num");
+			this.replenishment_amt=rs.getInt("replenishment");
+			this.location=rs.getString("location");
+		} catch(SQLException sqle){
+			//ignore
+			//weeee TROLOLOL
+		}
 	}
 
 	private void loadDescriptions() throws SQLException{
