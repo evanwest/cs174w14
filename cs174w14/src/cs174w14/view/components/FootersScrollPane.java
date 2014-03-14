@@ -19,9 +19,6 @@ public class FootersScrollPane extends JScrollPane {
 	private int numComponents;
 	private int numFooters;
 	
-	private ArrayList<JTextField> modelNumberFields;
-	private ArrayList<JTextField> quantityFields;
-	
 	public FootersScrollPane() {
 		orderPanel = new JPanel();
 		orderPanel.setLayout(new BoxLayout(orderPanel, BoxLayout.PAGE_AXIS));
@@ -38,7 +35,6 @@ public class FootersScrollPane extends JScrollPane {
 	public Component add(Component comp) {
 		comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, comp.getPreferredSize().height));
 		orderPanel.add(comp, numComponents++);
-		numComponents++;
 		return comp;
 	}
 	
@@ -49,14 +45,11 @@ public class FootersScrollPane extends JScrollPane {
 	}
 	
 	// Removes everything in this ScrollPane but the footers.
-	public void removeAll() {
-		//TODO: Fix this thing
-		/*
+	public void removeAll() {		
 		for (; numComponents > 0; numComponents--) {
 			orderPanel.remove(numComponents-1);
 		}
-		*/
-		orderPanel.removeAll();
+		
 		numComponents=0;
 	}
 	

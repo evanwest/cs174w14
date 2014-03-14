@@ -2,6 +2,9 @@ package cs174w14.run;
 
 import java.sql.SQLException;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import cs174w14.control.LoginController;
 import cs174w14.model.ConnectionManager;
 import cs174w14.model.eDepot;
@@ -17,6 +20,13 @@ public class eMart {
 		}
 		eDepot.init();
 		
+		try {
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | UnsupportedLookAndFeelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		LoginView loginView = new LoginView();
 		CustomerRunner customerRunner = new CustomerRunner();
 		ManagerRunner managerRunner = new ManagerRunner();

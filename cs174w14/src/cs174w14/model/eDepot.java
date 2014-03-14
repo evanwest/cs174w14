@@ -2,6 +2,9 @@ package cs174w14.model;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,7 +36,7 @@ private static Queue<ShippingNotice> shippingNotices;
 	public static void receiveShipment(int ship_id) {
 		while (!shippingNotices.isEmpty()) {
 			ShippingNotice shippingNotice = shippingNotices.remove();
-			shippingNotice.receive();
+			//shippingNotice.receive();
 		}
 	}
 	
@@ -52,10 +55,15 @@ private static Queue<ShippingNotice> shippingNotices;
 			
 			// get all manufacturers that we need to send replenishment orders to
 			ResultSet rs = ConnectionManager.runQuery(
-					"SELECT mfr, COUNT(*) AS replenish_count FROM Products" +
+					"SELECT mfr, COUNT(*) AS replenish_count FROM Depot_Products " +
 					"WHERE qty > min_num GROUP BY mfr HAVING COUNT(*) >= 2");
+			List<String> manufacturers = new ArrayList<String>();
 			while (rs.next()) {
-				sendReplenishmentOrder(rs.getString("mfr"));
+				manufacturers.add(rs.getString("mfr"));
+			}
+			ConnectionManager.clean();
+			for (String mfr : manufacturers) {
+				sendReplenishmentOrder(mfr);
 			}
 			
 			
@@ -70,13 +78,18 @@ private static Queue<ShippingNotice> shippingNotices;
 		try {
 			//get all products to send a replenishment order for this mfr
 			ResultSet rs = ConnectionManager.runQuery(
-					"SELECT model_num, max_num-qty AS num_to_order FROM Products" +
+					"SELECT model_num, max_num-qty AS num_to_order FROM Depot_Products " +
 					"WHERE mfr='"+mfr+"' AND qty < max_num");
+			ConnectionManager.clean();
 			
+			Map<String, Integer> shippingNoticeItems = new HashMap<String, Integer>();
+			while(rs.next()) {
+				shippingNoticeItems.put(rs.getString("model_num"), rs.getInt("num_to_order"));
+			}
 			ShippingNotice sn = new ShippingNotice(Utils.generateShippingId());
-			while (rs.next()) {
+			for (Map.Entry<String, Integer> entry : shippingNoticeItems.entrySet()) {
 				sn.setMfr(mfr);
-				sn.addEntry(rs.getString("model_num"), rs.getInt("num_to_order"));
+				sn.addEntry(entry.getKey(), entry.getValue());
 			}
 			sn.insert();
 			processShippingNotice(sn.getShip_id());

@@ -66,7 +66,7 @@ public class CustomerOrder implements ModelDataObject {
 		int newOrderNum = (int)(Math.random()*1000000000);
 		
 		try {
-			ResultSet rs = ConnectionManager.runQuery("SELECT order_num FROM Store_Orders");
+			ResultSet rs = ConnectionManager.runQuery("SELECT order_num FROM Store_Orders WHERE order_num="+newOrderNum);
 			if (rs.next()) {
 				ConnectionManager.clean();
 				return getNewOrderNum();

@@ -192,7 +192,7 @@ public class ShippingNotice implements ModelDataObject{
 					"UPDATE Depot_Products SET (replenishment) = ("
 							+ "SELECT (p.replenishment+sni.qty) AS replenishment "
 							+ "FROM Depot_Products p, Shipping_Notice_Items sni "
-							+ "WHERE p.mfr=sni.mfr AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id).close();
+							+ "WHERE p.mfr='"+this.mfr+"' AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id+")").close();
 				
 		return true;
 		} catch(SQLException sqle){
@@ -215,9 +215,9 @@ public class ShippingNotice implements ModelDataObject{
 			//modify replenishment (sub) and qty (add)
 			ConnectionManager.runQuery(
 					"UPDATE Depot_Products SET (replenishment, qty) = ("
-							+ "SELECT (p.replenishment-sni.qty) AS replenishment,"
-							+ "(p.qty+sni.qty) AS qty FROM Depot_Products p, Shipping_Notice_Items sni"
-							+ "WHERE p.mfr=sni.mfr AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id).close();
+							+ "SELECT (p.replenishment-sni.qty) AS replenishment, "
+							+ "(p.qty+sni.qty) AS qty FROM Depot_Products p, Shipping_Notice_Items sni "
+							+ "WHERE p.mfr='"+this.mfr+"' AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id+")").close();
 			
 			//delete this notice
 			delete();

@@ -278,7 +278,7 @@ public class Product implements ModelDataObject {
 	private void fillFromResultSet(ResultSet rs) throws SQLException{
 		this.stock_num=rs.getString("stock_num");
 		this.manufacturer=rs.getString("mfr");
-		this.model_num=rs.getString("model_num");
+		this.model_num=rs.getString("model_num").trim();
 		this.category=rs.getString("category");
 		this.price_cents=rs.getInt("price");
 		this.warranty=rs.getInt("warranty");
