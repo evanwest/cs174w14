@@ -77,4 +77,8 @@ public class CartView extends JFrame {
 		productScrollPane.setEmptyMessage(message);
 		productScrollPane.repaint();
 	}
+	
+	public void activateFilterBypasses(boolean b) {
+		productScrollPane.activateFilterBypasses(b);
+	}
 }

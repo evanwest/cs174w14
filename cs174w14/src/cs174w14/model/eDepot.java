@@ -40,8 +40,9 @@ private static Queue<ShippingNotice> shippingNotices;
 		}
 	}
 	
-	public static List<Product> fillOrder(int order_num) {
+	public static Map<Product, Integer> fillOrder(int order_num) {
 		try {
+			Map<Product, Integer> products = new HashMap<Product, Integer>();
 			System.out.println("filled order");
 			// update number in stock, send replenishment orders as necessary
 			CustomerOrder customerOrder = new CustomerOrder(order_num);
@@ -51,7 +52,12 @@ private static Queue<ShippingNotice> shippingNotices;
 				int qty = entry.getValue();
 				product.fill();
 				product.setQuantityInStock(product.getQuantityInStock()-qty);
-				product.push();
+				if (product.push()) {
+					products.put(product, qty);
+				}
+				else {
+					products.put(product, 0);
+				}
 			}
 			
 			// get all manufacturers that we need to send replenishment orders to
@@ -67,7 +73,7 @@ private static Queue<ShippingNotice> shippingNotices;
 			for (String mfr : manufacturers) {
 				sendReplenishmentOrder(mfr);
 			}
-			
+			return products;
 			
 		} catch (SQLException sqle){
 			sqle.printStackTrace();

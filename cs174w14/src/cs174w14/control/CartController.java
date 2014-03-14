@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import cs174w14.model.Cart;
@@ -64,7 +65,7 @@ public class CartController {
 			final String stockNumber = prod.getStockNum();
 			final CartProductPanel cartProductPanel = new CartProductPanel(stockNumber, 
 					prod.getCategory(), prod.getManufacturer(), prod.getModelNum(), prod.getDescriptionParagraph(), 
-					Integer.toString(prod.getWarranty()), prod.getAccessoryOfParagraph(), prod.getQuantityInStock(), prod.getPriceCents(), qty);
+					Integer.toString(prod.getWarranty()), prod.getAccessoryOfParagraph(), prod.getQuantityInStock(), prod.getPriceCents(), qty, true);
 
 			cartProductPanel.addQuantityButtonListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -103,57 +104,57 @@ public class CartController {
 			sqle.printStackTrace();
 		}
 		
-		final CheckoutDialog checkoutDialog = new CheckoutDialog(subtotal, discount, ship_hand);
-		checkoutDialog.addConfirmButtonListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				CustomerOrder co;
-				try{
-					co = new CustomerOrder(cart);
-					boolean result = co.insert();
-					result &= co.sendToStore();
-					if(!result){
-						System.err.println("Error placing order!");
-						//TODO: something useful here. This is a fatal error for this op 
-						return;
-					}
-					eDepot.fillOrder(co.getOrderNum());
-					//now reset cart contents
-					for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet() ){
-						entry.setValue(0);
-					}
-					result = cart.push();
-					if(!result){
-						System.err.println("Error resetting cart contents!");
-						//TODO: something useful here, this isn't a fatal error
-					}
-					
-					Customer cust = new Customer(cart.getCustomerId());
-					cust.fill();
-					cust.updateStatus();
-					if(cust.getLoyaltyExpiration()>0) {
-						cust.setLoyalty_expiration(cust.getLoyaltyExpiration()-1);
-					}
-					cust.push();
+		
+		
+		CustomerOrder co;
+		Map<Product, Integer> products = null;
+		try{
+			co = new CustomerOrder(cart);
+			boolean result = co.insert();
+			result &= co.sendToStore();
+			if(!result){
+				System.err.println("Error placing order!");
+				//TODO: something useful here. This is a fatal error for this op 
+				return;
+			}
+			products = eDepot.fillOrder(co.getOrderNum());
+			//now reset cart contents
+			for(Map.Entry<Product, Integer> entry : cart.getContents().entrySet() ){
+				entry.setValue(0);
+			}
+			result = cart.push();
+			if(!result){
+				System.err.println("Error resetting cart contents!");
+				//TODO: something useful here, this isn't a fatal error
+			}
+			
+			Customer cust = new Customer(cart.getCustomerId());
+			cust.fill();
+			cust.updateStatus();
+			if(cust.getLoyaltyExpiration()>0) {
+				cust.setLoyalty_expiration(cust.getLoyaltyExpiration()-1);
+			}
+			cust.push();
 
-					//passed in through the constructor. remember to update customer status
+			//passed in through the constructor. remember to update customer status
 
-					cartView.clearContents();
-					cartView.setEmptyMessage("Successfully checked out order number: "+co.getOrderNum());
+			cartView.clearContents();
+			cartView.setEmptyMessage("Successfully checked out order number: "+co.getOrderNum());
+			
+			final CheckoutDialog checkoutDialog = new CheckoutDialog(products, discount, ship_hand);
+			checkoutDialog.addConfirmButtonListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
 					checkoutDialog.dispose();
-				} catch(SQLException sqle){
-					System.err.println("Error placing order!");
-					ConnectionManager.clean();
-					sqle.printStackTrace();
-					//TODO: how handle errors
 				}
-			}
-		});
-		checkoutDialog.addCancelButtonListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				checkoutDialog.dispose();
-			}
-		});
-		checkoutDialog.setVisible(true);
+			});
+			checkoutDialog.setVisible(true);
+		} catch(SQLException sqle){
+			System.err.println("Error placing order!");
+			ConnectionManager.clean();
+			sqle.printStackTrace();
+			//TODO: how handle errors
+		}
+		
 	}
 
 	public void updateCartProductQuantity(String stockNumber, int quantity) {

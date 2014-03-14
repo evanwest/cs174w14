@@ -72,4 +72,10 @@ public class ProductScrollPane extends JScrollPane {
 		emptyMessageLabel.setText(message);
 		//TODO: need to redraw here??
 	}
+	
+	public void activateFilterBypasses(boolean b) {
+		for (Map.Entry<String, ProductPanel> entries : productPanelMap.entrySet()) {
+			entries.getValue().activateFilterBypass(b);
+		}
+	}
 }

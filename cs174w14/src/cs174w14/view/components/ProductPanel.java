@@ -127,60 +127,7 @@ public class ProductPanel extends JPanel {
 		
 		quantityField = new JTextField("0", 3);
 		
-		// make it so only numbers can be inputted into the qtyField.
-		((AbstractDocument)quantityField.getDocument()).setDocumentFilter(new DocumentFilter() {
-			@Override
-			public void remove(FilterBypass fb, int offset,
-					int length) throws BadLocationException {
-				String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
-				
-				// if the user tries to make the field empty, make its contents = "0"
-				if (totalStr.length() == length) {
-			    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), "0", null);
-			    }
-			}
-			
-			@Override
-			public void insertString(FilterBypass fb, int off
-			                    , String str, AttributeSet attr) 
-			                            throws BadLocationException 
-			{
-			    // remove non-digits
-			    fb.insertString(off, str.replaceAll("\\D++", ""), attr);
-			    
-			    String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
-			    String inStock = inStockLabel.getText();
-			    
-			    // if the user tries to make the field have a value higher than inStock, set its contents = inStock.
-			    if (Integer.valueOf(totalStr) > Integer.valueOf(inStock)) {
-			    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), inStock, attr);
-			    }
-			    
-			    // finally, remove leading 0's
-			    totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
-			    fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), Integer.valueOf(totalStr).toString(), attr);
-			} 
-			@Override
-			public void replace(FilterBypass fb, int off
-			        , int len, String str, AttributeSet attr) 
-			                        throws BadLocationException 
-			{
-			    // remove non-digits
-			    fb.replace(off, len, str.replaceAll("\\D++", ""), attr);
-			    
-			    String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
-			    String inStock = inStockLabel.getText();
-
-			    // if the user tries to make the field have a value higher than inStock, set its contents = inStock.
-			    if (Integer.valueOf(totalStr) > Integer.valueOf(inStock)) {
-			    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), inStock, attr);
-			    }
-			    
-			    // finally, remove leading 0's
-			    totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
-			    fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), Integer.valueOf(totalStr).toString(), attr);
-			}
-		});
+		
 		quantityButton = new JButton(buttonLabel);
 		
 		GridBagConstraints c = new GridBagConstraints();
@@ -273,6 +220,17 @@ public class ProductPanel extends JPanel {
 		detailsPanel.setVisible(false);
 		this.add(detailsPanel);
 		
+		activateFilterBypass(true);
+	}
+	
+	public void activateFilterBypass(boolean b) {
+		// make it so only numbers can be inputted into the qtyField.
+		if (b) {
+			((AbstractDocument)quantityField.getDocument()).setDocumentFilter(new ProductPanelDocumentFilter());
+		}
+		else {
+			((AbstractDocument)quantityField.getDocument()).setDocumentFilter(null);
+		}
 	}
 	
 	public ProductPanel(
@@ -321,8 +279,73 @@ public class ProductPanel extends JPanel {
 		quantityField.setText((new Integer(quantity)).toString());
 	}
 	
+	public void setQuantity(int quantity, boolean overrideFilterBypass) {
+		if (overrideFilterBypass) {
+			activateFilterBypass(false);
+			quantityField.setText((new Integer(quantity)).toString());
+			activateFilterBypass(true);
+		}
+		else {
+			quantityField.setText((new Integer(quantity)).toString());
+		}
+		
+	}
+	
 	public String getStockNumber() {
 		return stockNumberLabel.getText();
 	}
 	
+	private class ProductPanelDocumentFilter extends DocumentFilter {
+		@Override
+		public void remove(FilterBypass fb, int offset,
+				int length) throws BadLocationException {
+			String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+			
+			// if the user tries to make the field empty, make its contents = "0"
+			if (totalStr.length() == length) {
+		    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), "0", null);
+		    }
+		}
+		
+		@Override
+		public void insertString(FilterBypass fb, int off
+		                    , String str, AttributeSet attr) 
+		                            throws BadLocationException 
+		{
+		    // remove non-digits
+		    fb.insertString(off, str.replaceAll("\\D++", ""), attr);
+		    
+		    String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+		    String inStock = inStockLabel.getText();
+		    
+		    // if the user tries to make the field have a value higher than inStock, set its contents = inStock.
+		    if (Integer.valueOf(totalStr) > Integer.valueOf(inStock)) {
+		    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), inStock, attr);
+		    }
+		    
+		    // finally, remove leading 0's
+		    totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+		    fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), Integer.valueOf(totalStr).toString(), attr);
+		} 
+		@Override
+		public void replace(FilterBypass fb, int off
+		        , int len, String str, AttributeSet attr) 
+		                        throws BadLocationException 
+		{
+		    // remove non-digits
+		    fb.replace(off, len, str.replaceAll("\\D++", ""), attr);
+		    
+		    String totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+		    String inStock = inStockLabel.getText();
+
+		    // if the user tries to make the field have a value higher than inStock, set its contents = inStock.
+		    if (Integer.valueOf(totalStr) > Integer.valueOf(inStock)) {
+		    	fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), inStock, attr);
+		    }
+		    
+		    // finally, remove leading 0's
+		    totalStr = fb.getDocument().getText(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength());
+		    fb.replace(fb.getDocument().getStartPosition().getOffset(), fb.getDocument().getLength(), Integer.valueOf(totalStr).toString(), attr);
+		}
+	}
 }

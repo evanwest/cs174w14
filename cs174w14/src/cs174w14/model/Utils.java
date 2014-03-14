@@ -41,9 +41,10 @@ public class Utils {
 		if (priceCents == null) {
 			return null;
 		}
-		int cents = Math.abs(Integer.parseInt(priceCents));
+		int cents = Integer.parseInt(priceCents);
+		int posCents = Math.abs(cents);
 		
-		String ret = String.format("$%d.%02d", (int)(cents/100 + 0.5), cents%100);
+		String ret = String.format("$%d.%02d", (int)(posCents/100 + 0.5), posCents%100);
 		if (cents < 0) {
 			return "- " + ret;
 		}

@@ -97,35 +97,35 @@ public class PreviousOrdersController {
 			System.err.println("Error loading info for customer: "+username);
 			sqle.printStackTrace();
 		}
-
-		final String orderNo = orderNumber;
-		final CheckoutDialog checkoutDialog = new CheckoutDialog(subtotal, discount, ship_hand);
-		checkoutDialog.addConfirmButtonListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try{
-					CustomerOrder co = new CustomerOrder(Integer.valueOf(orderNo));
-					co.fill();
-					co.recalculate();
-					co.insert();
-					co.sendToStore();
-					eDepot.fillOrder(co.getOrderNum());
-					Customer cust = new Customer(co.getCustId());
-					cust.fill();
-					cust.updateStatus();
-					cust.push();
-					previousOrdersView.clearContents();
-					previousOrdersView.setEmptyMessage("Order number " + orderNo + " rerun as order number "+co.getOrderNum());
+		
+		try{
+			final String orderNo = orderNumber;
+			co = new CustomerOrder(Integer.valueOf(orderNo));
+			co.fill();
+			co.recalculate();
+			co.insert();
+			co.sendToStore();
+			Map<Product, Integer> products = eDepot.fillOrder(co.getOrderNum());
+			Customer cust = new Customer(co.getCustId());
+			cust.fill();
+			cust.updateStatus();
+			cust.push();
+			
+			
+			final CheckoutDialog checkoutDialog = new CheckoutDialog(products, discount, ship_hand);
+			checkoutDialog.addConfirmButtonListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
 					checkoutDialog.dispose();
-				} catch(SQLException sqle){
-					sqle.printStackTrace();
 				}
-			}
-		});
-		checkoutDialog.addCancelButtonListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				checkoutDialog.dispose();
-			}
-		});
-		checkoutDialog.setVisible(true);
+			});
+			checkoutDialog.setVisible(true);
+			
+			previousOrdersView.clearContents();
+			previousOrdersView.setEmptyMessage("Order number " + orderNo + " rerun as order number "+co.getOrderNum());
+			checkoutDialog.dispose();
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+		}
+
 	}
 }
