@@ -44,7 +44,7 @@ public class ProductSearchFactory {
 	public ProductSearchQuery create(){
 		StringBuilder query = new StringBuilder();
 
-		query.append("SELECT * FROM Products WHERE ");
+		query.append("SELECT * FROM Products NATURAL JOIN Depot_Products WHERE ");
 		if(stock_num != null){
 			query.append("stock_num='"+stock_num+"' AND ");
 		} 
