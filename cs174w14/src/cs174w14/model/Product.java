@@ -282,12 +282,6 @@ public class Product implements ModelDataObject {
 		this.category=rs.getString("category");
 		this.price_cents=rs.getInt("price");
 		this.warranty=rs.getInt("warranty");
-		this.quantity_in_stock=rs.getInt("qty");
-		this.location=rs.getString("location");
-		this.minimum_stock=rs.getInt("min_num");
-		this.maximum_stock=rs.getInt("max_num");
-		this.replenishment_amt=rs.getInt("replenishment");
-
 	}
 
 	private void loadDescriptions() throws SQLException{
