@@ -113,11 +113,6 @@ public class PreviousOrdersController {
 			
 			
 			final CheckoutDialog checkoutDialog = new CheckoutDialog(products, discount, ship_hand);
-			checkoutDialog.addConfirmButtonListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					checkoutDialog.dispose();
-				}
-			});
 			checkoutDialog.setVisible(true);
 			
 			previousOrdersView.clearContents();

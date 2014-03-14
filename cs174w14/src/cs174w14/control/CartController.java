@@ -142,11 +142,6 @@ public class CartController {
 			cartView.setEmptyMessage("Successfully checked out order number: "+co.getOrderNum());
 			
 			final CheckoutDialog checkoutDialog = new CheckoutDialog(products, discount, ship_hand);
-			checkoutDialog.addConfirmButtonListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					checkoutDialog.dispose();
-				}
-			});
 			checkoutDialog.setVisible(true);
 		} catch(SQLException sqle){
 			System.err.println("Error placing order!");

@@ -18,7 +18,6 @@ public class CheckoutDialog extends JDialog {
 	private static final int DIALOG_WIDTH = 300;
 	private static final int DIALOG_HEIGHT = 400;
 	
-	private JButton confirmButton;
 	private JLabel titlesLabel;
 	private JLabel totalsLabel;
 	private int totalCents;
@@ -72,24 +71,13 @@ public class CheckoutDialog extends JDialog {
 		
 		dialogPanel.add(titlesLabel, BorderLayout.WEST);
 		dialogPanel.add(totalsLabel, BorderLayout.EAST);
-		
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new GridLayout(1, 2));
-		
-		confirmButton = new JButton("Ok");
-		buttonPanel.add(confirmButton);
-		
-		scrollPane.add(dialogPanel, BorderLayout.NORTH);
-		scrollPane.add(buttonPanel, BorderLayout.SOUTH);
+					
+		scrollPane.add(dialogPanel);
 		this.add(scrollPane);
 	    this.setLocationRelativeTo(null); // center the window
 	}
 	
 	public int getTotalCents() {
 		return totalCents;
-	}
-	
-	public void addConfirmButtonListener(ActionListener buttonListener) {
-		confirmButton.addActionListener(buttonListener);
 	}
 }
