@@ -213,11 +213,17 @@ public class ShippingNotice implements ModelDataObject{
 	public boolean receive(){
 		try{
 			//modify replenishment (sub) and qty (add)
-			ConnectionManager.runQuery(
-					"UPDATE Depot_Products SET (replenishment, qty) = ("
-							+ "SELECT (p.replenishment-sni.qty) AS replenishment, "
-							+ "(p.qty+sni.qty) AS qty FROM Depot_Products p, Shipping_Notice_Items sni "
-							+ "WHERE p.mfr='"+this.mfr+"' AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id+")").close();
+			StringBuilder sb = new StringBuilder();
+			sb.append("UPDATE Depot_Products SET (replenishment, qty) = ("
+					+ "SELECT (p.replenishment-sni.qty), "
+					+ "(p.qty+sni.qty) FROM Depot_Products p, Shipping_Notice_Items sni "
+					+ "WHERE p.mfr='"+this.mfr+"' AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id+")"
+					+ "WHERE mfr='"+this.mfr+"' AND model_num IN (");
+			for(Map.Entry<Product, Integer> entry : contents.entrySet()){
+				sb.append(" '"+entry.getKey().getModelNum()+"' ");
+			}
+			sb.append(")");
+			ConnectionManager.runQuery(sb.toString()).close();
 			
 			//delete this notice
 			delete();
