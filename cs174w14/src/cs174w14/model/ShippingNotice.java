@@ -186,14 +186,20 @@ public class ShippingNotice implements ModelDataObject{
 					product.setDefaults();
 					product.insert();
 				}
-				product.setReplenishmentAmt(product.getReplenishmentAmount() + entry.getValue());
-				product.push();
 			}
 			
+			ConnectionManager.runQuery(
+					"UPDATE Depot_Products SET (replenishment) = ("
+							+ "SELECT (p.replenishment+sni.qty) AS replenishment "
+							+ "FROM Depot_Products p, Shipping_Notice_Items sni "
+							+ "WHERE p.mfr=sni.mfr AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id).close();
+				
 		return true;
 		} catch(SQLException sqle){
 			sqle.printStackTrace();
 			return false;
+		} finally {
+			ConnectionManager.clean();
 		}
 	}
 
@@ -207,14 +213,11 @@ public class ShippingNotice implements ModelDataObject{
 	public boolean receive(){
 		try{
 			//modify replenishment (sub) and qty (add)
-			for (Map.Entry<Product, Integer> entry : this.getContents().entrySet()) {
-				Product product = entry.getKey();
-				int qty = entry.getValue();
-				product.fill();
-				product.setReplenishmentAmt(product.getReplenishmentAmount()-qty);
-				product.setQuantityInStock(product.getQuantityInStock()+qty);
-				product.push();
-			}
+			ConnectionManager.runQuery(
+					"UPDATE Depot_Products SET (replenishment, qty) = ("
+							+ "SELECT (p.replenishment-sni.qty) AS replenishment,"
+							+ "(p.qty+sni.qty) AS qty FROM Depot_Products p, Shipping_Notice_Items sni"
+							+ "WHERE p.mfr=sni.mfr AND p.model_num=sni.model_num AND sni.ship_id="+this.ship_id).close();
 			
 			//delete this notice
 			delete();
