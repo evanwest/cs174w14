@@ -55,8 +55,8 @@ private static Queue<ShippingNotice> shippingNotices;
 			
 			// get all manufacturers that we need to send replenishment orders to
 			ResultSet rs = ConnectionManager.runQuery(
-					"SELECT mfr, COUNT(*) AS replenish_count FROM Depot_Products " +
-					"WHERE qty > min_num GROUP BY mfr HAVING COUNT(*) >= 2");
+					"SELECT mfr, COUNT(*) AS replen_count FROM Depot_Products " +
+					"WHERE qty < min_num GROUP BY mfr HAVING COUNT(*) >= 3");
 			List<String> manufacturers = new ArrayList<String>();
 			while (rs.next()) {
 				manufacturers.add(rs.getString("mfr"));
@@ -89,8 +89,8 @@ private static Queue<ShippingNotice> shippingNotices;
 			rs.close();
 			ConnectionManager.clean();
 			ShippingNotice sn = new ShippingNotice(Utils.generateShippingId());
+			sn.setMfr(mfr);
 			for (Map.Entry<String, Integer> entry : shippingNoticeItems.entrySet()) {
-				sn.setMfr(mfr);
 				sn.addEntry(entry.getKey(), entry.getValue());
 			}
 			sn.insert();
